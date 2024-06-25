@@ -38,6 +38,7 @@ export const useTasksStore = defineStore('tasks', {
       const task = await axios.post('api/tasks', payload)
         .then(r => r.data.data)
       this.tasks.push(task)
+      this.getTasks()
     },
 
     async updateTask(taskId, payload) {

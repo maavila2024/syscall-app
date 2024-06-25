@@ -1,8 +1,8 @@
 <template>
-  {{  tasks }}
   <v-table class="border-opacity-100">
     <thead>
       <tr>
+        <th class="text-left">Número do chamado</th>
         <th class="text-left">Título</th>
         <th class="text-left">Descrição</th>
         <th class="text-left">Solicitante</th>
@@ -16,6 +16,10 @@
 
     <tbody>
       <tr v-for="(task, i) in tasks" :key="i">
+        <td>
+          {{ task.task_code }}
+        </td>
+
         <td>
           {{ task.name }}
           <v-chip
@@ -34,21 +38,20 @@
         </td>
 
         <td>
-          {{ task.user.first_name }}
+          {{ task.user_owner.first_name }}
         </td>
 
-       <td>
-        {{ task.user.first_name }}
+        <td>
+          {{ task.user_responsible?.first_name || "Nenhum responsável" }}
         </td>
 
-       <td>
+        <td>
           {{ task.task_status.name }}
         </td>
 
-        
         <td>
           {{ task.priority.name }}
-        </td> 
+        </td>
 
         <td class="text-right">
           <div class="d-flex align-center">
@@ -71,24 +74,21 @@
             </v-tooltip>
             <v-tooltip text="Consultar Notas de Trabalho">
               <template v-slot:activator="{ props }">
-                <v-btn icon flat @click="toShowChat = task" v-bind="props"
-                  ><NotesIcon
-                    stroke-width="1.5"
-                    size="20"
-                    class="text-primary"
+                <v-btn icon flat @click="$emit('openChat', task)" v-bind="props"
+                  ><NotesIcon stroke-width="1.5" size="20" class="text-primary"
                 /></v-btn>
               </template>
             </v-tooltip>
-            <v-tooltip text="Adicionar Nota de Trabalho">
+            <!-- <v-tooltip text="Adicionar Nota de Trabalho">
               <template v-slot:activator="{ props }">
-                <v-btn icon flat @click="toAddChat = task" v-bind="props"
+                <v-btn icon flat @click="$emit('addNote', task)" v-bind="props"
                   ><PencilPlusIcon
                     stroke-width="1.5"
                     size="20"
                     class="text-primary"
                 /></v-btn>
               </template>
-            </v-tooltip>
+            </v-tooltip> -->
           </div>
         </td>
       </tr>
@@ -97,10 +97,15 @@
 </template>
 
 <script setup>
-import { DotsVerticalIcon, EditIcon, PencilPlusIcon, TrashIcon } from "vue-tabler-icons";
+import {
+  PencilIcon,
+  PencilPlusIcon,
+  TrashIcon,
+  NotesIcon,
+} from "vue-tabler-icons";
 import { useTasksStore } from "@/stores/apps/tasks";
 import { storeToRefs } from "pinia";
 
 const tasksStore = useTasksStore();
-const { tasks, toEdit, toDelete, toAddChat, toShowChat} = storeToRefs(tasksStore);
+const { tasks, toEdit, toDelete } = storeToRefs(tasksStore);
 </script>
