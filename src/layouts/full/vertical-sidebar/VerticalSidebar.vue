@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, shallowRef } from 'vue';
-import { useCustomizerStore } from '@/stores/customizer';
+import { useCustomizerStore } from '../../../stores/customizer';
 import sidebarItems from './sidebarItem';
 
 import NavGroup from './NavGroup/index.vue';
@@ -39,7 +39,7 @@ const sidebarMenu = shallowRef(sidebarItems);
         <v-locale-provider  v-else>
         <div class="pa-5" >
             <Logo />
-            <TeamMenu />
+            <TeamMenu />  
         </div>
         </v-locale-provider>
 

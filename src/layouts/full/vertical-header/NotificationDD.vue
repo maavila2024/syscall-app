@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import {notifications} from '@/_mockApis/headerData';
+<script >
+// import {notifications} from '@/_mockApis/headerData';
 </script>
 <template>
     <!-- ---------------------------------------------- -->

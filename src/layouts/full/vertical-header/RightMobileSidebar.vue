@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script >
 import { ref } from 'vue';
 import { AppsIcon, CalendarIcon, MailIcon, MessagesIcon } from 'vue-tabler-icons';
 import AppsLink from './AppsLink.vue';

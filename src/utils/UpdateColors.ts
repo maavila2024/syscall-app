@@ -1,7 +1,7 @@
 import { computed } from 'vue';
-import * as themeColors from '@/theme/LightTheme';
-import * as DarkThemeColors from '@/theme/DarkTheme';
-import { useCustomizerStore } from '@/stores/customizer';
+import * as themeColors from '../theme/LightTheme';
+import * as DarkThemeColors from '../theme/DarkTheme';
+import { useCustomizerStore } from '../stores/customizer';
 
 const custmizer = useCustomizerStore();
 

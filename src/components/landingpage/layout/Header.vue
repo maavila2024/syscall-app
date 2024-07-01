@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { useCustomizerStore } from '@/stores/customizer';
+import { useCustomizerStore } from '../../../stores/customizer';
 import Logo from '@/layouts/full/logo/Logo.vue';
 import RtlLogo from '@/layouts/full/logo/RtlLogo.vue';
 import Navigations from '@/components/landingpage/layout/Navigation.vue';
