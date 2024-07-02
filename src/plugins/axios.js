@@ -4,7 +4,7 @@ import {useLocalStorage} from '@vueuse/core';
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL
 axios.defaults.withCredentials = true;
-axios.defaults.withXSRFToken = true;
+// axios.defaults.withXSRFToken = true;
 
 axios.interceptors.request.use(function (config) {
   const team = useLocalStorage('team_id').value

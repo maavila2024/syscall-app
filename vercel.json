@@ -1,0 +1,15 @@
+{
+    "routes": [
+      {
+        "src": "/(.*)",
+        "headers": {
+          "Access-Control-Allow-Origin": "https://syscall-app.vercel.app",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+          "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Authorization",
+          "Access-Control-Allow-Credentials": "true"
+        },
+        "dest": "/index.html"
+      }
+    ]
+  }
+  
