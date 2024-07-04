@@ -1,6 +1,6 @@
-<script setup >
+<script setup lang="ts">
 import { MailIcon } from 'vue-tabler-icons';
-// import { profileDD } from '@/_mockApis/headerData';
+import { profileDD } from '../../headerData';
 
 import { useAuthStore } from '@/stores/auth';
 import { useMeStore } from "@/stores/me";

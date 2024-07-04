@@ -1,5 +1,5 @@
 <script setup>
-import AddNewUserDrawer from '@/views/apps/user/list/AddNewUserDrawer.vue'
+// import AddNewUserDrawer from '@/views/apps/user/list/AddNewUserDrawer.vue'
 
 // 👉 Store
 const searchQuery = ref('')
@@ -338,11 +338,11 @@ const deleteUser = async id => {
       <!-- SECTION -->
     </VCard>
 
-    <!-- 👉 Add New User -->
+    <!-- 👉 Add New User 
     <AddNewUserDrawer
       v-model:isDrawerOpen="isAddNewUserDrawerVisible"
       @user-data="addNewUser"
-    />
+    /> -->
   </section>
 </template>
 

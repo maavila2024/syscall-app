@@ -90,7 +90,7 @@ watch(priority, (newPriority) => {
         <!-- ---------------------------------------------- -->
         <!-- Notification -->
         <!-- ---------------------------------------------- -->
-        <!-- <NotificationDD /> -->
+        <NotificationDD /> 
 
         <!-- right sidebar -->
         <v-btn
@@ -107,7 +107,7 @@ watch(priority, (newPriority) => {
         <!-- User Profile -->
         <!-- ---------------------------------------------- -->
         <div class="ml-2">
-          <!--  <ProfileDD />  -->
+           <ProfileDD />  
         </div>
     </v-app-bar>
 

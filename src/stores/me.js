@@ -1,6 +1,6 @@
-import {defineStore} from 'pinia';
-import axios from "axios";
-import {useStorage} from '@vueuse/core';
+import { defineStore } from 'pinia';
+import axios from 'axios';
+import { useStorage } from '@vueuse/core';
 
 export const useMeStore = defineStore('me', {
   state: () => ({
@@ -10,23 +10,26 @@ export const useMeStore = defineStore('me', {
 
   actions: {
     getMe() {
-      return axios.get('api/me')
+      return axios.get('/api/me')
         .then((response) => {
-          this.user = response.data.data
-
+          this.user = response.data;
           this.setDefaultTeam();
         })
+        .catch((error) => {
+          console.error('Erro ao obter dados do usuário:', error);
+          this.user = null;
+        });
     },
 
     setDefaultTeam() {
       if (!this.user.teams.some(o => o.token === this.currentTeamToken)) {
-        this.changeTeam(this.defaultTeam.token)
+        this.changeTeam(this.defaultTeam.token);
       }
     },
 
     changeTeam(teamToken) {
       if (this.user.teams.some(o => o.token === teamToken)) {
-        this.currentTeamToken = teamToken
+        this.currentTeamToken = teamToken;
       }
     }
   },
@@ -36,4 +39,4 @@ export const useMeStore = defineStore('me', {
     defaultTeam: (state) => state?.user?.teams.find(o => o.default),
     currentTeam: (state) => state?.user?.teams.find(o => o.token === state.currentTeamToken)
   }
-})
+});

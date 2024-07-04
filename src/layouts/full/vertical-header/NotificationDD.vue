@@ -1,6 +1,3 @@
-<script >
-// import {notifications} from '@/_mockApis/headerData';
-</script>
 <template>
     <!-- ---------------------------------------------- -->
     <!-- notifications DD -->
@@ -17,7 +14,7 @@
             <div class="px-8 pb-4 pt-6">
                 <div class="d-flex align-center justify-space-between">
                     <h6 class="text-h5">Notifications</h6>
-                    <v-chip color="primary" variant="flat" size="small" class="text-white">5 New</v-chip>
+                    <v-chip color="primary" variant="flat" size="small" class="text-white">{{ notifications.length }} New</v-chip>
                 </div>
             </div>
             <perfect-scrollbar style="height: 400px">
@@ -42,3 +39,33 @@
         </v-sheet>
     </v-menu>
 </template>
+
+<script>
+import { useNotificationStore } from '../../../stores/apps/notifications';
+import { onMounted } from 'vue';
+import echo from '../../../echo';
+import { useMeStore } from "@/stores/me";
+
+const meStore = useMeStore()
+export default {
+  setup() {
+    const notificationStore = useNotificationStore();
+
+    onMounted(() => {
+      // Initialize Echo and listen for events
+      echo.private(`user.${meStore.user.id}`)
+        .listen('InteractionCreated', (e) => {
+          notificationStore.addNotification({
+            title: 'Nova Interação',
+            subtitle: e.interaction.comment,
+            avatar: 'path/to/avatar.jpg', // Ajuste conforme necessário
+          });
+        });
+    });
+
+    return {
+      notifications: notificationStore.notifications,
+    };
+  },
+};
+</script>
