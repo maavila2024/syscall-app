@@ -1,0 +1,1 @@
+import{_ as s}from"./principal_syscall-fb96c94f.js";import{u as e,o as t,c as a,a as o}from"./index-a48b8aaa.js";const c={class:"pa-3"},n=o("div",{class:""},[o("img",{src:s,class:"position-relative d-none d-lg-flex",alt:"login-background"})],-1),r=[n],m=e({setup(i){return(_,l)=>(t(),a("div",c,r))}});export{m as default};
