@@ -35,9 +35,9 @@ const meStore = useMeStore();
 
 meStore.getMe()
     .finally(() => {
-        if (meStore.user && meStore.user.id) {
-            initializeEcho(meStore.user.id);  // Inicializar Echo aqui
-        }
+        // if (meStore.user && meStore.user.id) {
+        //     initializeEcho(meStore.user.id);  // Inicializar Echo aqui
+        // }
 
         app.use(router);
         app.component('EasyDataTable', Vue3EasyDataTable);
