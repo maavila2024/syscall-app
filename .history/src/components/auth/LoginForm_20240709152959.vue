@@ -49,7 +49,7 @@ function login(values) {
   <VAlert v-if="feedbackMessage" color="error">
     {{ feedbackMessage }}
   </VAlert>
-  <VForm class="mt-5" @submit.prevent='submit'>
+  <VForm class="mt-5" @submit.prevent='submit' >
     <v-label class="text-subtitle-1 font-weight-semibold pb-2 text-lightText"
       >E-mail</v-label
     >
