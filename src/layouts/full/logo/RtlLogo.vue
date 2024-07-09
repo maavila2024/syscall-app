@@ -2,7 +2,7 @@
 import { computed } from "vue";
 import LogoLightRtl from "./LogoLightRtl.vue";
 import LogoDarkRtl from "./LogoDarkRtl.vue";
-import { useCustomizerStore } from "@/stores/customizer";
+import { useCustomizerStore } from "../../../stores/customizer";
 
 const customizer = useCustomizerStore();
 

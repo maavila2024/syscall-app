@@ -1,0 +1,1 @@
+import{u as e,o,c as t,a as s}from"./index-e5ea640e.js";const a="/assets/principal_syscall-dd7141bd.jpg",c={class:"pa-3"},n=s("div",{class:""},[s("img",{src:a,class:"position-relative d-none d-lg-flex",alt:"login-background"})],-1),i=[n],p=e({setup(l){return(r,_)=>(o(),t("div",c,i))}});export{p as default};
