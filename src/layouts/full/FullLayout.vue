@@ -2,6 +2,11 @@
 import { RouterView } from 'vue-router';
 import VerticalSidebarVue from './vertical-sidebar/VerticalSidebar.vue';
 import VerticalHeaderVue from './vertical-header/VerticalHeader.vue';
+<<<<<<< HEAD
+=======
+// import HorizontalHeader from './horizontal-header/HorizontalHeader.vue';
+// import HorizontalSidebar from './horizontal-sidebar/HorizontalSidebar.vue';
+>>>>>>> 75041d5e9834e647f6bd52ac523895644b0826a6
 import Customizer from './customizer/Customizer.vue';
 import { useCustomizerStore } from '../../stores/customizer';
 

@@ -41,6 +41,7 @@
 </template>
 
 <script>
+<<<<<<< HEAD
 // import { useNotificationStore } from '../../../stores/apps/notifications';
 import { onMounted } from 'vue';
 // import echo from '../../../echo';
@@ -68,4 +69,33 @@ const meStore = useMeStore()
 //     };
 //   },
 // };
+=======
+import { useNotificationStore } from '../../../stores/apps/notifications';
+import { onMounted } from 'vue';
+import echo from '../../../echo';
+import { useMeStore } from "@/stores/me";
+
+const meStore = useMeStore()
+export default {
+  setup() {
+    const notificationStore = useNotificationStore();
+
+    onMounted(() => {
+      // Initialize Echo and listen for events
+      echo.private(`user.${meStore.user.id}`)
+        .listen('InteractionCreated', (e) => {
+          notificationStore.addNotification({
+            title: 'Nova Interação',
+            subtitle: e.interaction.comment,
+            avatar: 'path/to/avatar.jpg', // Ajuste conforme necessário
+          });
+        });
+    });
+
+    return {
+      notifications: notificationStore.notifications,
+    };
+  },
+};
+>>>>>>> 75041d5e9834e647f6bd52ac523895644b0826a6
 </script>

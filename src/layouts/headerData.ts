@@ -1,5 +1,9 @@
 // project imports
+<<<<<<< HEAD
 import type { notificationType, profileType, appsLinkType, quickLinksType,searchType } from '../layouts/HeaderTypes'
+=======
+import type { notificationType, profileType, languageType, appsLinkType, quickLinksType,searchType } from '../layouts/HeaderTypes'
+>>>>>>> 75041d5e9834e647f6bd52ac523895644b0826a6
 // 
 // Notification
 // 
@@ -77,12 +81,21 @@ const profileDD: profileType[] = [
 // import flag2 from '../assets/images/flag/icon-flag-fr.svg';
 // import flag3 from '../assets/images/flag/icon-flag-ro.svg';
 // import flag4 from '../assets/images/flag/icon-flag-zh.svg';
+<<<<<<< HEAD
 // const languageDD: languageType[] = [
 //     { title: 'English', subtext: 'UK', value: 'en', avatar: '' },
 //     { title: 'français', subtext: 'French', value: 'fr', avatar: '' },
 //     { title: 'عربي', subtext: 'Arbic', value: 'ro', avatar: '' },
 //     { title: '中国人', subtext: 'Chinese', value: 'zh', avatar: '' }
 // ];
+=======
+const languageDD: languageType[] = [
+    { title: 'English', subtext: 'UK', value: 'en', avatar: '' },
+    { title: 'français', subtext: 'French', value: 'fr', avatar: '' },
+    { title: 'عربي', subtext: 'Arbic', value: 'ro', avatar: '' },
+    { title: '中国人', subtext: 'Chinese', value: 'zh', avatar: '' }
+];
+>>>>>>> 75041d5e9834e647f6bd52ac523895644b0826a6
 
 // 
 // AppsLink
@@ -230,4 +243,8 @@ const searchSugg: searchType[] = [
     },
 ];
 
+<<<<<<< HEAD
 export { notifications, profileDD, appsLink, quickLink, searchSugg };
+=======
+export { notifications, profileDD, languageDD, appsLink, quickLink, searchSugg };
+>>>>>>> 75041d5e9834e647f6bd52ac523895644b0826a6

@@ -39,8 +39,12 @@ export const useMeStore = defineStore('me', {
 
       return {
         ...team,
+<<<<<<< HEAD
         // show_ads: team.is_admin && !team.has_subscription,
         show_ads: team.is_admin,
+=======
+        show_ads: team.is_admin && !team.has_subscription,
+>>>>>>> 75041d5e9834e647f6bd52ac523895644b0826a6
       }
     }
   }

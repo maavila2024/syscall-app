@@ -11,7 +11,7 @@ import TwoStepForm from '@/components/auth/TwoStepForm.vue'
                 class="d-lg-flex align-center justify-center authentication position-relative">
                 <div class="auth-header pt-sm-6 pt-2 px-sm-6 px-3 pb-sm-6 pb-0">
                     <div class="position-relative">
-                        <Logo />
+                       <!-- <Logo /> -->
                     </div>
                 </div>
                 <div class="">

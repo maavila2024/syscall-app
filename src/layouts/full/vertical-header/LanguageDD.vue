@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { ref } from 'vue';
 // import { languageDD } from '@/_mockApis/headerData';
 import flag1 from '@/assets/images/flag/icon-flag-en.svg';
