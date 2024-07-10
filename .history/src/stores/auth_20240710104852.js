@@ -4,10 +4,10 @@ import {useMeStore} from '@/stores/me';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({}),
-  
+
   actions: {
     sanctum() {
-      return axios.get('sanctum/csrf-cookie')
+      return axios.get('api/sanctum/csrf-cookie')
     },
     login(email, password) {
       return axios.post('api/login', {

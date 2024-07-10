@@ -4,7 +4,7 @@ import {useMeStore} from '@/stores/me';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({}),
-  
+
   actions: {
     sanctum() {
       return axios.get('sanctum/csrf-cookie')
