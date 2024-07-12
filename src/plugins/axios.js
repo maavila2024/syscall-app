@@ -6,6 +6,7 @@ axios.defaults.withCredentials = true;
 axios.defaults.withXSRFToken = true;
 
 axios.interceptors.request.use(function (config) {
+  console.log(config)
   const team = useLocalStorage('team_id').value;
   if (team) {
     config.headers['Team'] = team;
