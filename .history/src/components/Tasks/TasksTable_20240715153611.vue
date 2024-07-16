@@ -1,0 +1,159 @@
+<template>
+  <v-table class="border-opacity-100">
+    <thead>
+      <tr>
+        <th class="text-left">Chamado</th>
+        <th class="text-left">Título</th>
+        <th class="text-left">Descrição</th>
+        <th class="text-left">Solicitante</th>
+        <th class="text-left">Responsável</th>
+        <th class="text-left">Status</th>
+        <th class="text-left">Prioridade</th>
+        <th class="text-left">Complexidade</th>
+        <th class="text-left">Ações</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr v-for="(task, i) in tasks" :key="i" :style="getStatusStyle(task.task_status)">
+        <td>{{ task.task_code }}</td>
+        <td>
+          <div class="truncate-text">{{ truncateText(task.name, 25) }}</div>
+          <v-chip
+            v-if="task.default"
+            size="small"
+            variant="tonal"
+            color="primary"
+            class="ml-2"
+          >
+            Default
+          </v-chip>
+        </td>
+        <td><div class="truncate-text">{{ task.description }}</div></td>
+        <td><div class="truncate-text">{{ task.user_owner.first_name }}</div></td>
+        <td><div class="truncate-text">{{ task.user_responsible?.first_name || "Nenhum responsável" }}</div></td>
+        <td><div class="truncate-text">{{ task.task_status.name }}</div></td>
+       
+        <td class="text-right">
+          <div class="d-flex align-center">
+            <v-tooltip :text="task.priority_justification">
+              <template v-slot:activator="{ props }">
+                <v-btn v-bind="props">
+                  <span v-bind="attrs" v-on="on">
+                    <div class="truncate-text">{{ task.priority.name }}</div>
+                  </span>
+                </v-btn>
+              </template>
+            </v-tooltip>
+          </div>
+        </td>
+
+        <td class="text-right">
+          <div class="d-flex align-center">
+            <v-tooltip :text="task.complexity_justification || 'Aguardando análise'">
+              <template v-slot:activator="{ props }">
+                <v-btn v-bind="props">
+                  <span v-bind="attrs" v-on="on">
+                    <div class="truncate-text">{{ task.complexity?.name || "Aguardando análise" }}</div>
+                  </span>
+                </v-btn>
+              </template>
+            </v-tooltip>
+          </div>
+        </td>
+
+        <td class="text-right">
+          <div class="d-flex align-center">
+            <v-tooltip text="Editar Chamado">
+              <template v-slot:activator="{ props }">
+                <v-btn icon flat @click="toEdit = task" v-bind="props">
+                  <PencilIcon
+                    stroke-width="1.5"
+                    size="20"
+                    class="text-primary"
+                  />
+                </v-btn>
+              </template>
+            </v-tooltip>
+            <v-tooltip text="Deletar Chamado">
+              <template v-slot:activator="{ props }">
+                <v-btn icon flat @click="toDelete = task" v-bind="props">
+                  <TrashIcon stroke-width="1.5" size="20" class="text-error" />
+                </v-btn>
+              </template>
+            </v-tooltip>
+            <v-tooltip text="Consultar Notas de Trabalho">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  icon
+                  flat
+                  @click="$emit('openChat', task)"
+                  v-bind="props"
+                >
+                  <NotesIcon
+                    stroke-width="1.5"
+                    size="20"
+                    class="text-primary"
+                  />
+                </v-btn>
+              </template>
+            </v-tooltip>
+            <v-tooltip text="Anexos">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  icon
+                  flat
+                  @click="$emit('openAttachments', task)"
+                  v-bind="props"
+                >
+                  <PaperclipIcon
+                    stroke-width="1.5"
+                    size="20"
+                    class="text-primary"
+                  />
+                </v-btn>
+              </template>
+            </v-tooltip>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </v-table>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import { PencilIcon, TrashIcon, NotesIcon, PaperclipIcon } from "vue-tabler-icons";
+import { useTasksStore } from "@/stores/apps/tasks";
+import { storeToRefs } from "pinia";
+
+const tasksStore = useTasksStore();
+const { tasks, toEdit, toDelete, taskFiles } = storeToRefs(tasksStore);
+
+const getStatusStyle = (taskStatus) => {
+  return {
+    color: taskStatus.color,
+    // backgroundColor: taskStatus.bg_color,
+  };
+};
+
+// Função para truncar texto
+const truncateText = (text, maxLength) => {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return text.substring(0, maxLength) + '...';
+};
+</script>
+
+<style>
+.truncate-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Número máximo de linhas */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+</style>
