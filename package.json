@@ -48,6 +48,7 @@
         "vue3-recaptcha-v2": "1.0.1",
         "vuedraggable": "^2.24.3",
         "vuetify": "3.3.3",
+        "xlsx": "^0.18.5",
         "yup": "^0.32.11",
         "yup-locale-pt": "^0.0.9"
     },
