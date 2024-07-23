@@ -1,5 +1,5 @@
 <template>
-
+  <PerfectScrollbar style="max-height: 500px;">
     <v-table class="border-opacity-100">
       <thead>
         <tr>
@@ -313,6 +313,7 @@
         </tr>
       </tbody>
     </v-table>
+  </PerfectScrollbar>
 </template>
 
 <script setup>
@@ -321,6 +322,8 @@ import { PencilIcon, TrashIcon, NotesIcon, PaperclipIcon, FilterIcon, EyeIcon } 
 import { useTasksStore } from "@/stores/apps/tasks";
 import { storeToRefs } from "pinia";
 import { useMeStore } from "@/stores/me";
+// import PerfectScrollbar from 'vue3-perfect-scrollbar';
+import 'vue3-perfect-scrollbar/dist/vue3-perfect-scrollbar.css';
 
 const meStore = useMeStore();
 const tasksStore = useTasksStore();

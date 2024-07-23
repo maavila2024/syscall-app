@@ -321,6 +321,8 @@ import { PencilIcon, TrashIcon, NotesIcon, PaperclipIcon, FilterIcon, EyeIcon } 
 import { useTasksStore } from "@/stores/apps/tasks";
 import { storeToRefs } from "pinia";
 import { useMeStore } from "@/stores/me";
+// import PerfectScrollbar from 'vue3-perfect-scrollbar';
+// import 'vue3-perfect-scrollbar/dist/vue3-perfect-scrollbar.css';
 
 const meStore = useMeStore();
 const tasksStore = useTasksStore();

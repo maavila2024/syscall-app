@@ -1,5 +1,5 @@
 <template>
-
+  <PerfectScrollbar style="max-height: 500px">
     <v-table class="border-opacity-100">
       <thead>
         <tr>
@@ -313,19 +313,31 @@
         </tr>
       </tbody>
     </v-table>
+  </PerfectScrollbar>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { PencilIcon, TrashIcon, NotesIcon, PaperclipIcon, FilterIcon, EyeIcon } from "vue-tabler-icons";
+import { ref, computed, watch } from "vue";
+import {
+  PencilIcon,
+  TrashIcon,
+  NotesIcon,
+  PaperclipIcon,
+  FilterIcon,
+  EyeIcon,
+} from "vue-tabler-icons";
 import { useTasksStore } from "@/stores/apps/tasks";
 import { storeToRefs } from "pinia";
 import { useMeStore } from "@/stores/me";
+import PerfectScrollbar from "vue3-perfect-scrollbar";
+import "vue3-perfect-scrollbar/dist/vue3-perfect-scrollbar.css";
 
 const meStore = useMeStore();
 const tasksStore = useTasksStore();
 const { tasks, toShow, toEdit, toDelete, taskFiles } = storeToRefs(tasksStore);
-const isAdmin = computed(() => meStore.user.teams.some(team => team.is_admin));
+const isAdmin = computed(() =>
+  meStore.user.teams.some((team) => team.is_admin)
+);
 
 // Filtros para cada coluna
 const selectedStatuses = ref([]);
@@ -342,11 +354,25 @@ const showPriorityFilter = ref(false);
 const showComplexityFilter = ref(false);
 
 // Opções de filtros únicas
-const statusOptions = computed(() => [...new Set(tasks.value.map(task => task.task_status.name))]);
-const ownerOptions = computed(() => [...new Set(tasks.value.map(task => task.user_owner.first_name))]);
-const responsibleOptions = computed(() => [...new Set(tasks.value.map(task => task.user_responsible?.first_name || "Nenhum responsável"))]);
-const priorityOptions = computed(() => [...new Set(tasks.value.map(task => task.priority.name))]);
-const complexityOptions = computed(() => [...new Set(tasks.value.map(task => task.complexity.name))]);
+const statusOptions = computed(() => [
+  ...new Set(tasks.value.map((task) => task.task_status.name)),
+]);
+const ownerOptions = computed(() => [
+  ...new Set(tasks.value.map((task) => task.user_owner.first_name)),
+]);
+const responsibleOptions = computed(() => [
+  ...new Set(
+    tasks.value.map(
+      (task) => task.user_responsible?.first_name || "Nenhum responsável"
+    )
+  ),
+]);
+const priorityOptions = computed(() => [
+  ...new Set(tasks.value.map((task) => task.priority.name)),
+]);
+const complexityOptions = computed(() => [
+  ...new Set(tasks.value.map((task) => task.complexity.name)),
+]);
 
 // Estado do checkbox "Selecionar todos"
 const selectAllStatuses = ref(false);
@@ -357,23 +383,28 @@ const selectAllComplexities = ref(false);
 
 // Funções de manipulação dos filtros
 const handleStatusChange = () => {
-  selectAllStatuses.value = selectedStatuses.value.length === statusOptions.value.length;
+  selectAllStatuses.value =
+    selectedStatuses.value.length === statusOptions.value.length;
 };
 
 const handleOwnerChange = () => {
-  selectAllOwners.value = selectedOwners.value.length === ownerOptions.value.length;
+  selectAllOwners.value =
+    selectedOwners.value.length === ownerOptions.value.length;
 };
 
 const handleResponsibleChange = () => {
-  selectAllResponsibles.value = selectedResponsibles.value.length === responsibleOptions.value.length;
+  selectAllResponsibles.value =
+    selectedResponsibles.value.length === responsibleOptions.value.length;
 };
 
 const handlePriorityChange = () => {
-  selectAllPriorities.value = selectedPriorities.value.length === priorityOptions.value.length;
+  selectAllPriorities.value =
+    selectedPriorities.value.length === priorityOptions.value.length;
 };
 
 const handleComplexityChange = () => {
-  selectAllComplexities.value = selectedComplexities.value.length === complexityOptions.value.length;
+  selectAllComplexities.value =
+    selectedComplexities.value.length === complexityOptions.value.length;
 };
 
 const toggleSelectAllStatuses = () => {
@@ -417,29 +448,32 @@ const toggleSelectAllComplexities = () => {
 };
 
 // Filtragem das tarefas com base nos filtros selecionados
-// const filteredTasks = computed(() => {
-//   return tasks.value.filter(task => {
-//     const statusMatch = selectedStatuses.value.length === 0 || selectedStatuses.value.includes(task.task_status.name);
-//     const ownerMatch = selectedOwners.value.length === 0 || selectedOwners.value.includes(task.user_owner.first_name);
-//     const responsibleMatch = selectedResponsibles.value.length === 0 || selectedResponsibles.value.includes(task.user_responsible?.first_name || "Nenhum responsável");
-//     const priorityMatch = selectedPriorities.value.length === 0 || selectedPriorities.value.includes(task.priority.name);
-//     const complexityMatch = selectedComplexities.value.length === 0 || selectedComplexities.value.includes(task.complexity.name);
-//     return statusMatch && ownerMatch && responsibleMatch && priorityMatch && complexityMatch;
-//   });
-// });
-
 const filteredTasks = computed(() => {
-  if (!tasks.value) {
-    return []; // ou alguma ação padrão
-  }
-
-  return tasks.value.filter(task => {
-    const statusMatch = selectedStatuses.value.length === 0 || selectedStatuses.value.includes(task.task_status.name);
-    const ownerMatch = selectedOwners.value.length === 0 || selectedOwners.value.includes(task.user_owner.first_name);
-    const responsibleMatch = selectedResponsibles.value.length === 0 || selectedResponsibles.value.includes(task.user_responsible?.first_name || "Nenhum responsável");
-    const priorityMatch = selectedPriorities.value.length === 0 || selectedPriorities.value.includes(task.priority.name);
-    const complexityMatch = selectedComplexities.value.length === 0 || selectedComplexities.value.includes(task.complexity.name);
-    return statusMatch && ownerMatch && responsibleMatch && priorityMatch && complexityMatch;
+  return tasks.value.filter((task) => {
+    const statusMatch =
+      selectedStatuses.value.length === 0 ||
+      selectedStatuses.value.includes(task.task_status.name);
+    const ownerMatch =
+      selectedOwners.value.length === 0 ||
+      selectedOwners.value.includes(task.user_owner.first_name);
+    const responsibleMatch =
+      selectedResponsibles.value.length === 0 ||
+      selectedResponsibles.value.includes(
+        task.user_responsible?.first_name || "Nenhum responsável"
+      );
+    const priorityMatch =
+      selectedPriorities.value.length === 0 ||
+      selectedPriorities.value.includes(task.priority.name);
+    const complexityMatch =
+      selectedComplexities.value.length === 0 ||
+      selectedComplexities.value.includes(task.complexity.name);
+    return (
+      statusMatch &&
+      ownerMatch &&
+      responsibleMatch &&
+      priorityMatch &&
+      complexityMatch
+    );
   });
 });
 
@@ -450,7 +484,6 @@ const getStatusStyle = (taskStatus) => {
   };
 };
 </script>
-
 
 <style>
 .text-clamp {

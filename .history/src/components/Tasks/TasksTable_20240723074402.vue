@@ -1,5 +1,6 @@
 <template>
-
+   <div class="tasks-table-container">
+  <PerfectScrollbar style="max-height: 500px;">
     <v-table class="border-opacity-100">
       <thead>
         <tr>
@@ -313,9 +314,13 @@
         </tr>
       </tbody>
     </v-table>
+  </PerfectScrollbar>
+</div>
 </template>
 
 <script setup>
+import PerfectScrollbar from 'vue3-perfect-scrollbar';
+import 'vue3-perfect-scrollbar/dist/vue3-perfect-scrollbar.css';
 import { ref, computed, watch } from 'vue';
 import { PencilIcon, TrashIcon, NotesIcon, PaperclipIcon, FilterIcon, EyeIcon } from "vue-tabler-icons";
 import { useTasksStore } from "@/stores/apps/tasks";

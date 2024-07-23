@@ -33,7 +33,7 @@ export const useTasksStore = defineStore('tasks', {
         const response = await axios.get('api/tasks', {
           params: { search }
         });
-        this.tasks = response.data;
+        this.tasks = response.data.data;
       } catch (error) {
         console.error('Error fetching tasks:', error);
       }
