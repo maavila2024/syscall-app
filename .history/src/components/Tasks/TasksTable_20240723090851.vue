@@ -3,54 +3,47 @@
     <div class="table-wrapper">
       <v-table class="border-opacity-100">
         <thead>
-  <tr>
-    <th class="text-left" style="width: 50px" @click="sortTable('task_code')">
-      Chamado
-      <v-icon v-if="sortBy === 'task_code'">{{ sortOrder === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
-    </th>
-    <th class="text-left" style="width: 50px" @click="sortTable('name')">
-      Título
-      <v-icon v-if="sortBy === 'name'">{{ sortOrder === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
-    </th>
-    <th class="text-left" style="width: 150px" @click="sortTable('description')">
-      Descrição
-      <v-icon v-if="sortBy === 'description'">{{ sortOrder === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
-    </th>
-    <th class="text-left" style="width: 100px">
-      Solicitante
-      <v-btn icon @click="showOwnerFilter = !showOwnerFilter">
-        <FilterIcon />
-      </v-btn>
-    </th>
-    <th class="text-left" style="width: 100px">
-      Responsável
-      <v-btn icon @click="showResponsibleFilter = !showResponsibleFilter">
-        <FilterIcon />
-      </v-btn>
-    </th>
-    <th class="text-left" style="width: 120px">
-      Status
-      <v-btn icon @click="showStatusFilter = !showStatusFilter">
-        <FilterIcon />
-      </v-btn>
-    </th>
-    <th class="text-left" style="width: 120px">
-      Prioridade
-      <v-btn icon @click="showPriorityFilter = !showPriorityFilter">
-        <FilterIcon />
-      </v-btn>
-    </th>
-    <th class="text-left" style="width: 150px">
-      Complexidade
-      <v-btn icon @click="showComplexityFilter = !showComplexityFilter">
-        <FilterIcon />
-      </v-btn>
-    </th>
-    <th class="text-left" style="width: 100px">Ações</th>
-    <th></th>
-  </tr>
-</thead>
-
+          <tr>
+            <th class="text-left" style="width: 50px">Chamado</th>
+            <th class="text-left" style="width: 50px">Título</th>
+            <th class="text-left" style="width: 150px">Descrição</th>
+            <th class="text-left" style="width: 100px">
+              Solicitante
+              <v-btn icon @click="showOwnerFilter = !showOwnerFilter">
+                <FilterIcon />
+              </v-btn>
+            </th>
+            <th class="text-left" style="width: 100px">
+              Responsável
+              <v-btn
+                icon
+                @click="showResponsibleFilter = !showResponsibleFilter"
+              >
+                <FilterIcon />
+              </v-btn>
+            </th>
+            <th class="text-left" style="width: 120px">
+              Status
+              <v-btn icon @click="showStatusFilter = !showStatusFilter">
+                <FilterIcon />
+              </v-btn>
+            </th>
+            <th class="text-left" style="width: 120px">
+              Prioridade
+              <v-btn icon @click="showPriorityFilter = !showPriorityFilter">
+                <FilterIcon />
+              </v-btn>
+            </th>
+            <th class="text-left" style="width: 150px">
+              Complexidade
+              <v-btn icon @click="showComplexityFilter = !showComplexityFilter">
+                <FilterIcon />
+              </v-btn>
+            </th>
+            <th class="text-left" style="width: 100px">Ações</th>
+            <th></th>
+          </tr>
+        </thead>
 
         <tbody>
           <!-- Filtros -->
@@ -331,15 +324,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
-import {
-  PencilIcon,
-  TrashIcon,
-  NotesIcon,
-  PaperclipIcon,
-  FilterIcon,
-  EyeIcon,
-} from "vue-tabler-icons";
+import { ref, computed } from 'vue';
+import { PencilIcon, TrashIcon, NotesIcon, PaperclipIcon, FilterIcon, EyeIcon } from "vue-tabler-icons";
 import { useTasksStore } from "@/stores/apps/tasks";
 import { storeToRefs } from "pinia";
 import { useMeStore } from "@/stores/me";
@@ -347,9 +333,7 @@ import { useMeStore } from "@/stores/me";
 const meStore = useMeStore();
 const tasksStore = useTasksStore();
 const { tasks, toShow, toEdit, toDelete, taskFiles } = storeToRefs(tasksStore);
-const isAdmin = computed(() =>
-  meStore.user.teams.some((team) => team.is_admin)
-);
+const isAdmin = computed(() => meStore.user.teams.some(team => team.is_admin));
 
 // Filtros para cada coluna
 const selectedStatuses = ref([]);
@@ -366,25 +350,11 @@ const showPriorityFilter = ref(false);
 const showComplexityFilter = ref(false);
 
 // Opções de filtros únicas
-const statusOptions = computed(() => [
-  ...new Set(tasks.value.map((task) => task.task_status.name)),
-]);
-const ownerOptions = computed(() => [
-  ...new Set(tasks.value.map((task) => task.user_owner.first_name)),
-]);
-const responsibleOptions = computed(() => [
-  ...new Set(
-    tasks.value.map(
-      (task) => task.user_responsible?.first_name || "Nenhum responsável"
-    )
-  ),
-]);
-const priorityOptions = computed(() => [
-  ...new Set(tasks.value.map((task) => task.priority.name)),
-]);
-const complexityOptions = computed(() => [
-  ...new Set(tasks.value.map((task) => task.complexity.name)),
-]);
+const statusOptions = computed(() => [...new Set(tasks.value.map(task => task.task_status.name))]);
+const ownerOptions = computed(() => [...new Set(tasks.value.map(task => task.user_owner.first_name))]);
+const responsibleOptions = computed(() => [...new Set(tasks.value.map(task => task.user_responsible?.first_name || "Nenhum responsável"))]);
+const priorityOptions = computed(() => [...new Set(tasks.value.map(task => task.priority.name))]);
+const complexityOptions = computed(() => [...new Set(tasks.value.map(task => task.complexity.name))]);
 
 // Estado do checkbox "Selecionar todos"
 const selectAllStatuses = ref(false);
@@ -395,28 +365,23 @@ const selectAllComplexities = ref(false);
 
 // Funções de manipulação dos filtros
 const handleStatusChange = () => {
-  selectAllStatuses.value =
-    selectedStatuses.value.length === statusOptions.value.length;
+  selectAllStatuses.value = selectedStatuses.value.length === statusOptions.value.length;
 };
 
 const handleOwnerChange = () => {
-  selectAllOwners.value =
-    selectedOwners.value.length === ownerOptions.value.length;
+  selectAllOwners.value = selectedOwners.value.length === ownerOptions.value.length;
 };
 
 const handleResponsibleChange = () => {
-  selectAllResponsibles.value =
-    selectedResponsibles.value.length === responsibleOptions.value.length;
+  selectAllResponsibles.value = selectedResponsibles.value.length === responsibleOptions.value.length;
 };
 
 const handlePriorityChange = () => {
-  selectAllPriorities.value =
-    selectedPriorities.value.length === priorityOptions.value.length;
+  selectAllPriorities.value = selectedPriorities.value.length === priorityOptions.value.length;
 };
 
 const handleComplexityChange = () => {
-  selectAllComplexities.value =
-    selectedComplexities.value.length === complexityOptions.value.length;
+  selectAllComplexities.value = selectedComplexities.value.length === complexityOptions.value.length;
 };
 
 const toggleSelectAllStatuses = () => {
@@ -459,84 +424,60 @@ const toggleSelectAllComplexities = () => {
   }
 };
 
-// Ordenação
-const sortBy = ref('');
+// Estado para ordenação
+const sortKey = ref('');
 const sortOrder = ref('asc');
 
+// Função para alternar a ordenação
 const sortTable = (key) => {
-  if (sortBy.value === key) {
+  if (sortKey.value === key) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
   } else {
-    sortBy.value = key;
+    sortKey.value = key;
     sortOrder.value = 'asc';
   }
 };
 
+// Função de comparação para ordenação
+const compare = (a, b, key) => {
+  const keys = key.split('.');
+  let aVal = a;
+  let bVal = b;
+  keys.forEach(k => {
+    aVal = aVal[k];
+    bVal = bVal[k];
+  });
+  if (aVal < bVal) return sortOrder.value === 'asc' ? -1 : 1;
+  if (aVal > bVal) return sortOrder.value === 'asc' ? 1 : -1;
+  return 0;
+};
+
+// Filtragem e ordenação das tarefas
 const sortedTasks = computed(() => {
-  const sorted = [...tasks.value];
-  sorted.sort((a, b) => {
-    const keyA = a[sortBy.value];
-    const keyB = b[sortBy.value];
-    if (keyA < keyB) return sortOrder.value === 'asc' ? -1 : 1;
-    if (keyA > keyB) return sortOrder.value === 'asc' ? 1 : -1;
-    return 0;
+  const filtered = tasks.value.filter(task => {
+    const statusMatch = selectedStatuses.value.length === 0 || selectedStatuses.value.includes(task.task_status.name);
+    const ownerMatch = selectedOwners.value.length === 0 || selectedOwners.value.includes(task.user_owner.first_name);
+    const responsibleMatch = selectedResponsibles.value.length === 0 || selectedResponsibles.value.includes(task.user_responsible?.first_name || "Nenhum responsável");
+    const priorityMatch = selectedPriorities.value.length === 0 || selectedPriorities.value.includes(task.priority.name);
+    const complexityMatch = selectedComplexities.value.length === 0 || selectedComplexities.value.includes(task.complexity.name);
+    return statusMatch && ownerMatch && responsibleMatch && priorityMatch && complexityMatch;
   });
-  return sorted;
-});
 
-// Filtragem das tarefas com base nos filtros selecionados
-const filteredTasks = computed(() => {
-  if (!tasks.value) {
-    return []; // ou alguma ação padrão
+  if (sortKey.value) {
+    return filtered.sort((a, b) => compare(a, b, sortKey.value));
   }
-
-  return sortedTasks.value.filter((task) => {
-    const statusMatch =
-      selectedStatuses.value.length === 0 ||
-      selectedStatuses.value.includes(task.task_status.name);
-    const ownerMatch =
-      selectedOwners.value.length === 0 ||
-      selectedOwners.value.includes(task.user_owner.first_name);
-    const responsibleMatch =
-      selectedResponsibles.value.length === 0 ||
-      selectedResponsibles.value.includes(
-        task.user_responsible?.first_name || "Nenhum responsável"
-      );
-    const priorityMatch =
-      selectedPriorities.value.length === 0 ||
-      selectedPriorities.value.includes(task.priority.name);
-    const complexityMatch =
-      selectedComplexities.value.length === 0 ||
-      selectedComplexities.value.includes(task.complexity.name);
-    return (
-      statusMatch &&
-      ownerMatch &&
-      responsibleMatch &&
-      priorityMatch &&
-      complexityMatch
-    );
-  });
+  return filtered;
 });
 
 const getStatusStyle = (taskStatus) => {
   return {
     color: taskStatus.color,
-    // backgroundColor: taskStatus.bg_color,
   };
 };
 </script>
 
 
-<style scoped>
-.tasks-table-container {
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-.table-wrapper {
-  display: block;
-}
-
+<style>
 .text-clamp {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -546,5 +487,14 @@ const getStatusStyle = (taskStatus) => {
   hyphens: auto;
   word-break: keep-all; /* Impede quebra inadequada de palavras */
   white-space: normal; /* Permite quebra de linha */
+}
+
+.tasks-table-container {
+  overflow: auto;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  white-space: nowrap;
 }
 </style>

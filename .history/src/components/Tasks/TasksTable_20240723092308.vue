@@ -459,38 +459,24 @@ const toggleSelectAllComplexities = () => {
   }
 };
 
-// Ordenação
-const sortBy = ref('');
-const sortOrder = ref('asc');
-
-const sortTable = (key) => {
-  if (sortBy.value === key) {
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
-  } else {
-    sortBy.value = key;
-    sortOrder.value = 'asc';
-  }
-};
-
-const sortedTasks = computed(() => {
-  const sorted = [...tasks.value];
-  sorted.sort((a, b) => {
-    const keyA = a[sortBy.value];
-    const keyB = b[sortBy.value];
-    if (keyA < keyB) return sortOrder.value === 'asc' ? -1 : 1;
-    if (keyA > keyB) return sortOrder.value === 'asc' ? 1 : -1;
-    return 0;
-  });
-  return sorted;
-});
-
 // Filtragem das tarefas com base nos filtros selecionados
+// const filteredTasks = computed(() => {
+//   return tasks.value.filter(task => {
+//     const statusMatch = selectedStatuses.value.length === 0 || selectedStatuses.value.includes(task.task_status.name);
+//     const ownerMatch = selectedOwners.value.length === 0 || selectedOwners.value.includes(task.user_owner.first_name);
+//     const responsibleMatch = selectedResponsibles.value.length === 0 || selectedResponsibles.value.includes(task.user_responsible?.first_name || "Nenhum responsável");
+//     const priorityMatch = selectedPriorities.value.length === 0 || selectedPriorities.value.includes(task.priority.name);
+//     const complexityMatch = selectedComplexities.value.length === 0 || selectedComplexities.value.includes(task.complexity.name);
+//     return statusMatch && ownerMatch && responsibleMatch && priorityMatch && complexityMatch;
+//   });
+// });
+
 const filteredTasks = computed(() => {
   if (!tasks.value) {
     return []; // ou alguma ação padrão
   }
 
-  return sortedTasks.value.filter((task) => {
+  return tasks.value.filter((task) => {
     const statusMatch =
       selectedStatuses.value.length === 0 ||
       selectedStatuses.value.includes(task.task_status.name);
@@ -525,7 +511,6 @@ const getStatusStyle = (taskStatus) => {
   };
 };
 </script>
-
 
 <style scoped>
 .tasks-table-container {
