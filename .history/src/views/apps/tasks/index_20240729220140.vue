@@ -98,9 +98,7 @@ import TaskAttachments from '@/components/Tasks/TaskAttachments.vue';
 import { useTasksStore } from '@/stores/apps/tasks';
 import { useChatStore } from '@/stores/apps/chats';
 import { useMeStore } from "@/stores/me";
-import { useRoute } from 'vue-router';
 
-const route = useRoute();
 const meStore = useMeStore();
 const tasksStore = useTasksStore();
 const { toShow, toEdit, toDelete } = storeToRefs(tasksStore);
@@ -191,7 +189,7 @@ const openAttachmentsModal = (task) => {
 };
 
 const search = ref('');
-const isSpecificSearch = ref(false);
+
 const selectedSegment = ref(meStore.user?.default_segment || "0");
 
 function debounce(fn, delay) {
@@ -199,6 +197,7 @@ function debounce(fn, delay) {
   return function(...args) {
     clearTimeout(timeoutID);
     timeoutID = setTimeout(() => fn(...args), delay);
+    alert('debounce')
   };
 }
 
@@ -214,24 +213,25 @@ const updateUserSegment = async () => {
 const fetchTasksDebounced = debounce(async () => {
   const query = search.value || '';
   await tasksStore.getTasks(query, selectedSegment.value);
-}, 2000);
+}, 13000);
 
-watch(search, fetchTasksDebounced);
-watch(selectedSegment, fetchTasksDebounced);
+// const fetchTasks = async () => {
+//   alert('fetch1')
+//   const query = search.value || '';
+//   await tasksStore.getTasks(query);
+// };
+
+watch(search, fetchTasksDebounced,  alert('watch1'));
+watch(selectedSegment, fetchTasksDebounced,  alert('watch2'));
 
 onMounted(() => {
-  const query = route.query.search || '';
-  if (query) {
-    isSpecificSearch.value = true;
-    tasksStore.getTasks(query).then(() => {
-      isSpecificSearch.value = false;
-    });
-  } else {
-    fetchTasksDebounced();
-  }
+  selectedSegment.value = meStore.user?.default_segment?.toString() || "0";
+  alert('mounted index')
+  fetchTasksDebounced();
 });
 
 watch(search, (newSearch) => {
+  // alert('watch3')
   tasksStore.getTasks(newSearch);
 });
 </script>

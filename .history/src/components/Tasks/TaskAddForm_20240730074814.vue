@@ -176,7 +176,7 @@ const defaultTaskStatus = computed(() => {
   return tasksStore.taskStatus.find((s) => s.is_default)?.id || null;
 });
 
-const { value: segment } = useField("segment", 2);
+const { value: segment } = useField("segment");
 const { value: priority_id } = useField("priority_id");
 const { value: task_status_id } = useField("task_status_id");
 
@@ -243,7 +243,6 @@ const submit = handleSubmit(async (values) => {
   console.log('priority_id at submit:', priority_id.value);
   console.log('values before sending:', values);
   values.priority_id = priority_id.value;
-  values.segment = segment.value;
   try {
     // Primeiro, cria a interação
     const files = selectedFiles.value;

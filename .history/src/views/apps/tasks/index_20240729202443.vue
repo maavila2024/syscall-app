@@ -98,9 +98,7 @@ import TaskAttachments from '@/components/Tasks/TaskAttachments.vue';
 import { useTasksStore } from '@/stores/apps/tasks';
 import { useChatStore } from '@/stores/apps/chats';
 import { useMeStore } from "@/stores/me";
-import { useRoute } from 'vue-router';
 
-const route = useRoute();
 const meStore = useMeStore();
 const tasksStore = useTasksStore();
 const { toShow, toEdit, toDelete } = storeToRefs(tasksStore);
@@ -191,48 +189,37 @@ const openAttachmentsModal = (task) => {
 };
 
 const search = ref('');
-const isSpecificSearch = ref(false);
-const selectedSegment = ref(meStore.user?.default_segment || "0");
 
-function debounce(fn, delay) {
-  let timeoutID;
-  return function(...args) {
-    clearTimeout(timeoutID);
-    timeoutID = setTimeout(() => fn(...args), delay);
-  };
-}
+const selectedSegment = ref(meStore.user?.default_segment || "0");
 
 const updateUserSegment = async () => {
   try {
     await meStore.updateUserSegment(selectedSegment.value);
-    fetchTasksDebounced();
+    fetchTasks();
   } catch (error) {
     console.error("Failed to update user segment:", error);
   }
 };
 
-const fetchTasksDebounced = debounce(async () => {
-  const query = search.value || '';
-  await tasksStore.getTasks(query, selectedSegment.value);
-}, 2000);
+watch(search, fetchTasks,  alert('watch1'));
 
-watch(search, fetchTasksDebounced);
-watch(selectedSegment, fetchTasksDebounced);
+watch(selectedSegment, fetchTasks,  alert('watch2'));
 
 onMounted(() => {
-  const query = route.query.search || '';
-  if (query) {
-    isSpecificSearch.value = true;
-    tasksStore.getTasks(query).then(() => {
-      isSpecificSearch.value = false;
-    });
-  } else {
-    fetchTasksDebounced();
-  }
+  // selectedSegment.value = meStore.user?.default_segment?.toString() || "0";
+  alert('mounted')
+  fetchTasks();
 });
 
+const fetchTasks = async () => {
+  alert('fetch')
+  const query = search.value || '';
+  await tasksStore.getTasks(query);
+};
+
 watch(search, (newSearch) => {
-  tasksStore.getTasks(newSearch);
+  alert('watch3')
+  // tasksStore.getTasks(newSearch);
 });
 </script>
 <style scoped>

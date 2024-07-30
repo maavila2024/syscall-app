@@ -420,10 +420,9 @@ const getStatusStyle = (taskStatus) => {
 
 // Adicionando a chamada para `getTasks`
 onMounted(() => {
+  alert('mounted taskstable')
   const query = route.query.search || '';
-  if (query) {
-    tasksStore.getTasks(query);
-  }
+  tasksStore.getTasks(query);
 });
 
 // Adicionando watch para monitorar mudanças na rota
@@ -431,6 +430,7 @@ watch(
   () => route.query.search,
   (newSearch) => {
     const query = newSearch || '';
+    alert('watch taskstable')
     tasksStore.getTasks(query);
   }
 );

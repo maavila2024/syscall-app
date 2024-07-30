@@ -98,9 +98,7 @@ import TaskAttachments from '@/components/Tasks/TaskAttachments.vue';
 import { useTasksStore } from '@/stores/apps/tasks';
 import { useChatStore } from '@/stores/apps/chats';
 import { useMeStore } from "@/stores/me";
-import { useRoute } from 'vue-router';
 
-const route = useRoute();
 const meStore = useMeStore();
 const tasksStore = useTasksStore();
 const { toShow, toEdit, toDelete } = storeToRefs(tasksStore);
@@ -214,10 +212,10 @@ const updateUserSegment = async () => {
 const fetchTasksDebounced = debounce(async () => {
   const query = search.value || '';
   await tasksStore.getTasks(query, selectedSegment.value);
-}, 2000);
+}, 3000);
 
-watch(search, fetchTasksDebounced);
-watch(selectedSegment, fetchTasksDebounced);
+watch(search, fetchTasksDebounced,  alert('watch1'));
+watch(selectedSegment, fetchTasksDebounced,  alert('watch2'));
 
 onMounted(() => {
   const query = route.query.search || '';
@@ -232,6 +230,7 @@ onMounted(() => {
 });
 
 watch(search, (newSearch) => {
+  // alert('watch3')
   tasksStore.getTasks(newSearch);
 });
 </script>
