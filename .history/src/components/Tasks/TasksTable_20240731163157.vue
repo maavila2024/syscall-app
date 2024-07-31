@@ -148,11 +148,11 @@
             </td>
             <td class="text-right">
               <div class="d-flex align-center">
-                <v-tooltip :text="task?.complexity_justification || 'Em análise'">
+                <v-tooltip :text="task?.complexity_justification || 'Aguardando análise'">
                   <template v-slot:activator="{ props }">
                     <v-btn v-bind="props">
                       <span v-bind="attrs" v-on="on">
-                        <div class="text-clamp">{{ task?.complexity?.name || "Em análise" }}</div>
+                        <div class="text-clamp">{{ task?.complexity?.name || "Aguardando análise" }}</div>
                       </span>
                     </v-btn>
                   </template>

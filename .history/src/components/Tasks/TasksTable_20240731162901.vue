@@ -148,11 +148,11 @@
             </td>
             <td class="text-right">
               <div class="d-flex align-center">
-                <v-tooltip :text="task?.complexity_justification || 'Em análise'">
+                <v-tooltip :text="task?.complexity_justification || 'Aguardando análise'">
                   <template v-slot:activator="{ props }">
                     <v-btn v-bind="props">
                       <span v-bind="attrs" v-on="on">
-                        <div class="text-clamp">{{ task?.complexity?.name || "Em análise" }}</div>
+                        <div class="text-clamp">{{ task?.complexity?.name || "Aguardando análise" }}</div>
                       </span>
                     </v-btn>
                   </template>
@@ -270,7 +270,7 @@ const priorityOptions = computed(() => [
   ...new Set(tasks.value.map((task) => task.priority.name)),
 ]);
 const complexityOptions = computed(() => [
-...new Set(tasks.value.map((task) => task.complexity?.name || "Em análise"))
+...new Set(tasks.value.map((task) => task.complexity?.name || "Indefinida"))
 ]);
 
 // Estado do checkbox "Selecionar todos"
@@ -404,11 +404,9 @@ const filteredTasks = computed(() => {
     const priorityMatch =
       selectedPriorities.value.length === 0 ||
       selectedPriorities.value.includes(task.priority.name);
-      const complexityMatch =
+    const complexityMatch =
       selectedComplexities.value.length === 0 ||
-      selectedComplexities.value.includes(
-        task.complexity?.name || "Em análise"
-      );
+      selectedComplexities.value.includes(task.complexity.name);
       const segmentMatch = meStore.user?.default_segment == 0 || task.segment == meStore.user?.default_segment;
     
     return (
