@@ -26,6 +26,6 @@ jobs:
           env:
             SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_SYSCALL }}
             SOURCE: "dist"
-            REMOTE_HOST: "ec2-52-67-189-175.sa-east-1.compute.amazonaws.com"
+            REMOTE_HOST: "ec2-3-147-33-90.us-east-2.compute.amazonaws.com"
             REMOTE_USER: "ec2-user"
             TARGET: "/opt/front/syscall-app"
