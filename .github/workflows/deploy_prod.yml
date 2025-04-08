@@ -1,0 +1,31 @@
+name: deply_prod
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to EC2 on main branch push
+    runs-on: ubuntu-latest
+
+    steps:
+        - uses: actions/checkout@main
+        
+        - name: Setup nodejs
+          uses: actions/setup-node@master
+        
+        - name: Npm Install | npm build
+          run: |
+            npm install
+            npm run build
+        
+        - name: Deploy EC2 instance
+          uses: easingthemes/ssh-deploy@v2.1.5
+          env:
+            SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY_SYSCALL }}
+            SOURCE: "dist"
+            REMOTE_HOST: "dcontrol-web.s3.us-east-2.amazonaws.com"
+            REMOTE_USER: "ec2-user"
+            TARGET: "/opt/front/syscall-app"
