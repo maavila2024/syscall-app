@@ -144,7 +144,7 @@ export const useTasksStore = defineStore('tasks', {
       }
     },
 
-    // Adicionando a função getTaskFiles
+    // Adicionando a função getTaskFiles   
     async getTaskFiles(taskId) {
       try {
         const response = await axios.get(`api/task-file/${taskId}`);

@@ -4,7 +4,7 @@ import { useLocalStorage } from '@vueuse/core';
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 axios.defaults.withCredentials = true;
 axios.defaults.withXSRFToken = true;
-
+  
 const csrfTokenMetaTag = document.querySelector('meta[name="csrf-token"]');
 if (csrfTokenMetaTag) {
     axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfTokenMetaTag.getAttribute('content');

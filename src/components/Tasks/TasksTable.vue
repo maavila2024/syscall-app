@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div class="tasks-table-container">
     <div class="table-wrapper">
       <v-table class="border-opacity-100">

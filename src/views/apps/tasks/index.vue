@@ -152,7 +152,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup>  
 import { computed, ref, watch, onMounted } from "vue";
 import { TrashIcon } from "vue-tabler-icons";
 import { useAsyncState } from "@vueuse/core";

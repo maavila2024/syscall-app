@@ -16,8 +16,6 @@ export const errorMessage = (code = 'ServerErrorException') => messages[code]
 //     return `${baseUrl}/storage/${filePath}`;
 // }
 
-
-
 export function getFullUrl(filePath) {
     const s3BaseUrl = import.meta.env.VITE_S3_URL;
     return `${s3BaseUrl}/${filePath}`;

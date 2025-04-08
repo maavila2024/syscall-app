@@ -1,4 +1,4 @@
-<template>
+<template> 
   <v-dialog v-model="isAttachmentsModalOpen" max-width="800px" persistent>
     <v-card>
       <v-card-title>
