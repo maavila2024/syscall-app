@@ -10,11 +10,18 @@ const messages = {
 
 export const errorMessage = (code = 'ServerErrorException') => messages[code] 
 
+// export function getFullUrl(filePath) {
+//     // Supondo que seu backend esteja rodando no localhost:8000
+//     const baseUrl = import.meta.env.VITE_API_URL;
+//     return `${baseUrl}/storage/${filePath}`;
+// }
+
 export function getFullUrl(filePath) {
-    // Supondo que seu backend esteja rodando no localhost:8000
-    const baseUrl = import.meta.env.VITE_API_URL;
-    return `${baseUrl}/storage/${filePath}`;
+    const s3BaseUrl = import.meta.env.VITE_S3_URL; // Defina a URL base do S3 no arquivo .env
+    return `${s3BaseUrl}/${filePath}`;
 }
+
+
 
 export function formatDateToBR(date) {
     if (!date) return "Data não disponível";

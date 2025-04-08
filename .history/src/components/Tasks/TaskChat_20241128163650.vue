@@ -19,7 +19,10 @@
                       <v-list-item v-for="(interaction_file, j) in message.interaction_files" :key="j">
                         <v-list-item-content>
                           <v-list-item-title>
-                            <a :href="getFullUrl(interaction_file.path)" target="_blank">{{ interaction_file.name }}</a>
+                           <a :href="interaction_file.file_url" target="_blank">{{ interaction_file.name }}</a>
+
+
+                          <!--  <a :href="getFullUrl(interaction_file.path)" target="_blank">{{ interaction_file.name }}</a> -->
                           </v-list-item-title>
                         </v-list-item-content>
                       </v-list-item>
@@ -35,6 +38,11 @@
         </v-container>
       </v-card-text>
       <v-card-actions>
+        <!-- Toggle para mostrar atualizações -->
+        <v-switch
+          v-model="showAllMessages"
+          label="Mostrar Atualizações do Chamado?"
+        ></v-switch>
         <v-btn color="primary" @click="openAddCommentModal">Adicionar Comentário</v-btn>
         <v-btn color="secondary" @click="closeChatModal">Fechar</v-btn>
       </v-card-actions>
@@ -63,10 +71,6 @@
           </v-form>
         </v-card-text>
         <v-card-actions>
-          <v-switch
-            v-model="showAllMessages"
-            label="Mostrar Atualizações do Chamado?"
-          ></v-switch>
           <v-btn color="blue darken-1" text @click="isAddCommentModalOpen = false">Cancelar</v-btn>
           <v-btn color="blue darken-1" text :loading="isSubmitting" @click="submit">Adicionar</v-btn>
         </v-card-actions>
@@ -105,7 +109,7 @@ const { messages } = storeToRefs(chatStore);
 
 const isChatModalOpen = ref(false);
 const isAddCommentModalOpen = ref(false);
-const showAllMessages = ref(false);
+const showAllMessages = ref(false); // Controle do toggle
 
 const schema = object({
   comment: string().required().label('Comentário'),
@@ -134,7 +138,7 @@ const submit = handleSubmit(async (values) => {
       await chatStore.uploadFile(formData);
     }
 
-    await chatStore.fetchMessages(props.taskId);
+    await chatStore.fetchMessages(props.taskId, showAllMessages.value);
     isAddCommentModalOpen.value = false;
     emit('update:showChatModal', false);
   } catch (error) {
@@ -148,17 +152,19 @@ const { value: selectedFiles } = useField('files');
 watch(() => props.showChatModal, async (newValue) => {
   if (newValue) {
     isChatModalOpen.value = true;
-    await chatStore.fetchMessages(props.taskId, showAllMessages.value); 
+    await chatStore.fetchMessages(props.taskId, showAllMessages.value); // Use o estado do toggle
   } else {
     isChatModalOpen.value = false;
   }
 });
 
+// Observa mudanças no toggle e recarrega as mensagens
 watch(showAllMessages, async (newValue) => {
   await chatStore.fetchMessages(props.taskId, newValue);
 });
 
 const closeChatModal = () => {
+  showAllMessages.value = false;
   emit('update:showChatModal', false);
 };
 

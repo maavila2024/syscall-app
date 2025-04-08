@@ -10,11 +10,17 @@ const messages = {
 
 export const errorMessage = (code = 'ServerErrorException') => messages[code] 
 
+// export function getFullUrl(filePath) {
+//     // Supondo que seu backend esteja rodando no localhost:8000
+//     const baseUrl = import.meta.env.VITE_API_URL;
+//     return `${baseUrl}/storage/${filePath}`;
+// }
+
 export function getFullUrl(filePath) {
-    // Supondo que seu backend esteja rodando no localhost:8000
-    const baseUrl = import.meta.env.VITE_API_URL;
-    return `${baseUrl}/storage/${filePath}`;
+    // O `filePath` já deve ser a URL completa vinda do backend
+    return filePath; 
 }
+
 
 export function formatDateToBR(date) {
     if (!date) return "Data não disponível";

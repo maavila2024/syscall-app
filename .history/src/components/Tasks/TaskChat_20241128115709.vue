@@ -19,7 +19,10 @@
                       <v-list-item v-for="(interaction_file, j) in message.interaction_files" :key="j">
                         <v-list-item-content>
                           <v-list-item-title>
-                            <a :href="getFullUrl(interaction_file.path)" target="_blank">{{ interaction_file.name }}</a>
+                            <a :href="interaction_file.file_url" target="_blank">{{ interaction_file.name }}</a>
+
+
+                          <!--  <a :href="getFullUrl(interaction_file.path)" target="_blank">{{ interaction_file.name }}</a> -->
                           </v-list-item-title>
                         </v-list-item-content>
                       </v-list-item>
@@ -161,6 +164,7 @@ watch(showAllMessages, async (newValue) => {
 });
 
 const closeChatModal = () => {
+  showAllMessages.value = false;
   emit('update:showChatModal', false);
 };
 
