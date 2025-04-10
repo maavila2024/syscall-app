@@ -149,6 +149,17 @@ const submit = handleSubmit(async (values) => {
 const { value: comment } = useField('comment');
 const { value: selectedFiles } = useField('files');
 
+watch(() => props.taskId, async (newValue) => {
+  if (newValue) {
+    console.log('Buscando mensagens para task:', newValue);
+    try {
+      await chatStore.fetchMessages(newValue, showAllMessages.value);
+    } catch (error) {
+      console.error('Erro ao buscar mensagens:', error);
+    }
+  }
+}, { immediate: true });
+
 watch(() => props.showChatModal, async (newValue) => {
   if (newValue) {
     isChatModalOpen.value = true;
