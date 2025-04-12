@@ -10,7 +10,7 @@
             <v-col v-for="(file, i) in taskFiles" :key="i" cols="12">
               <v-card class="mb-3">
                 <v-card-text>
-                  <a :href="getFullUrl(file.path)" target="_blank">{{ file.name }}</a>
+                  <a :href="file.file_url" target="_blank">{{ file.name }}</a>
                   <v-btn icon @click="confirmDelete(file.id)">
                     <CircleMinusIcon />
                   </v-btn>
