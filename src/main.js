@@ -20,6 +20,7 @@ import { useMeStore } from './stores/me';
 
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
+console.log('Pusher Key:', import.meta.env.VITE_PUSHER_KEY);
 
 window.Pusher = Pusher;
 
