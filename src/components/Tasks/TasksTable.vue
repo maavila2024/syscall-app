@@ -389,6 +389,19 @@
         </tfoot>
       </v-table>
     </div>
+
+    <div class="d-flex justify-space-between align-center mt-4">
+      <span class="text-caption">
+        Mostrando {{ pagination.per_page }} de {{ pagination.total }} registros
+      </span>
+      
+      <v-pagination
+        v-model="currentPage"
+        :length="pagination.last_page"
+        :total-visible="7"
+        @update:model-value="handlePageChange"
+      ></v-pagination>
+    </div>
   </div>
 </template>
 
@@ -414,7 +427,7 @@ const meStore = useMeStore();
 const tasksStore = useTasksStore();
 const route = useRoute();
 const router = useRouter();
-const { tasks, toShow, toEdit, toDelete, taskFiles } = storeToRefs(tasksStore);
+const { tasks, toShow, toEdit, toDelete, taskFiles, pagination } = storeToRefs(tasksStore);
 const isAdmin = computed(() =>
   meStore.user.teams.some((team) => team.is_admin)
 );
@@ -566,16 +579,6 @@ const sortedTasks = computed(() => {
   return sorted;
 });
 
-// // Chamada inicial ao montar o componente
-// onMounted(() => {
-//   if (route.query.search) {
-//     const query = route.query.search || '';
-//     tasksStore.getTasks(query);
-//   } else {
-//     tasksStore.getTasks();
-//   }
-// });
-
 // Filtragem das tarefas com base nos filtros selecionados
 const filteredTasks = computed(() => {
   if (!tasks.value) {
@@ -645,6 +648,12 @@ watch(
 
 const handleExportCSV = () => {
   exportToCSV(filteredTasks.value, "tasks.csv");
+};
+
+const currentPage = ref(1);
+
+const handlePageChange = (page) => {
+  tasksStore.getTasks('', selectedSegment.value, page, currentFilters.value);
 };
 </script>
 
