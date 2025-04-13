@@ -1,0 +1,4 @@
+# ... outras entradas ...
+.history/
+.history/*
+*/.history/* 

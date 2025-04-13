@@ -27,14 +27,16 @@ export const useTasksStore = defineStore('tasks', {
   actions: {
     async getTasks(search = '', segment = '0', page = 1, filters = {}) {
       try {
-        // Gera uma string de query parameters incluindo todos os filtros
         const params = {
           search,
           segment,
           page,
-          ...filters, // Inclui todos os filtros passados como objeto
+          per_page: 15,
+          sort_by: filters.sortBy || 'created_at',
+          sort_order: filters.sortOrder || 'desc',
+          ...filters
         };
-    
+
         const response = await axios.get('api/tasks', { params });
         this.tasks = response.data.data;
         this.pagination = {
