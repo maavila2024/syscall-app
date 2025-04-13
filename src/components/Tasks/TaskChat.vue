@@ -193,6 +193,27 @@ const formatDate = (date) => {
 const sortedMessages = computed(() => {
   return [...messages.value].sort((a, b) => b.id - a.id);
 });
+
+const handleFileUpload = async (files) => {
+  try {
+    const formData = new FormData();
+    for (let file of files) {
+      formData.append('files[]', file);
+    }
+    formData.append('interaction_id', props.interactionId);
+
+    // Log para debug
+    console.log('FormData:', formData);
+    
+    const response = await chatStore.uploadFile(formData);
+    console.log('Upload response:', response);
+    
+    // Recarrega as mensagens após o upload
+    await chatStore.fetchMessages(props.taskId);
+  } catch (error) {
+    console.error('Erro no upload:', error);
+  }
+};
 </script>
 
 <style scoped>

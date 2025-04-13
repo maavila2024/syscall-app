@@ -40,14 +40,19 @@ export const useChatStore = defineStore('chats', {
     },
     async uploadFile(formData) {
       try {
+        // Log para debug
+        console.log('Enviando formData:', formData);
+        
         const response = await axios.post('/api/interaction-file', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
-          },
+          }
         });
+        
+        console.log('Resposta do upload:', response.data);
         return response.data;
       } catch (error) {
-        console.error('Error uploading file:', error);
+        console.error('Erro no upload:', error);
         throw error;
       }
     },
