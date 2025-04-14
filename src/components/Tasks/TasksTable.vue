@@ -623,9 +623,9 @@ const filteredTasks = computed(() => {
 });
 
 const getStatusStyle = (taskStatus) => {
+  if (!taskStatus) return {}; // evita erro se undefined
   return {
     color: taskStatus.color,
-    // backgroundColor: taskStatus.bg_color,
   };
 };
 
