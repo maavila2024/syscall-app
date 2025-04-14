@@ -3,6 +3,7 @@ import { computed } from "vue";
 import LogoLight from "./LogoLight.vue";
 import LogoDark from "./LogoDark.vue";
 import { useCustomizerStore } from "../../../stores/customizer";
+import logoImage from '@/assets/images/syscall/principal_dcontrol.jpeg';
 
 const customizer = useCustomizerStore();
 
@@ -27,7 +28,7 @@ const dark = computed(() => {
 <template>
   <div class="logo-wrapper">
     <v-img
-      src="@/assets/images/syscall/principal_dcontrol.jpeg"
+      :src="logoImage"
       class="position-relative d-none d-lg-flex"
       max-width="180"
       contain
