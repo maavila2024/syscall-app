@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="mb-5 pb-5 border-b border-opacity-100">
-      <v-row align="center" justify="space-between">
-        <v-col cols="12" lg="3" md="4">
+      <v-row align="center" justify="space-between" class="mb-4">
+        <v-col cols="12" lg="4" md="4">
           <v-text-field
             density="compact"
             v-model="search"
@@ -11,29 +11,6 @@
             hide-details
             variant="outlined"
           ></v-text-field>
-        </v-col>
-        <v-col cols="12" lg="5" md="4" class="d-flex align-center">
-          <label class="mr-4">Segmento:</label>
-          <v-radio-group
-            v-model="selectedSegment"
-            @change="updateUserSegment"
-            row
-            inline
-            class="radio-button"
-          >
-            <v-radio label="Todos" value="0" class="mr-2"></v-radio>
-            <v-radio label="Grãos" value="1" class="mr-2"></v-radio>
-            <v-radio label="Proteína" value="2"></v-radio>
-          </v-radio-group>
-        </v-col>
-        <v-col cols="12" lg="2" md="2" class="d-flex align-center">
-          <v-switch
-            v-model="showAllTasks"
-            label="Mostrar Todos Chamados"
-            color="primary"
-            hide-details
-            @change="handleShowAllChange"
-          ></v-switch>
         </v-col>
         <v-col cols="12" lg="2" md="2" class="text-right">
           <v-dialog width="800" persistent>
@@ -54,6 +31,60 @@
               </v-card>
             </template>
           </v-dialog>
+        </v-col>
+      </v-row>
+
+      <v-row align="center">
+        <v-col cols="12" lg="4" md="4" class="d-flex align-center">
+          <label class="mr-4">Segmento:</label>
+          <v-radio-group
+            v-model="selectedSegment"
+            @change="updateUserSegment"
+            row
+            inline
+            class="radio-button"
+          >
+            <v-radio label="Todos" value="0" class="mr-2"></v-radio>
+            <v-radio label="Grãos" value="1" class="mr-2"></v-radio>
+            <v-radio label="Proteína" value="2"></v-radio>
+          </v-radio-group>
+        </v-col>
+
+        <v-col cols="12" lg="8" md="8" class="d-flex align-center">
+          <v-switch
+            v-model="showAllTasks"
+            label="Mostrar Todos Chamados"
+            color="primary"
+            hide-details
+            class="mr-4"
+            @change="handleShowAllChange"
+          ></v-switch>
+
+          <v-select
+            v-model="selectedMonth"
+            :items="months"
+            label="Mês"
+            hide-details
+            class="mr-2"
+            style="max-width: 150px"
+          ></v-select>
+
+          <v-select
+            v-model="selectedYear"
+            :items="years"
+            label="Ano"
+            hide-details
+            class="mr-4"
+            style="max-width: 100px"
+          ></v-select>
+
+          <v-btn 
+            color="primary" 
+            @click="applyDateFilter"
+            :disabled="!selectedMonth || !selectedYear"
+          >
+            Filtrar por Data
+          </v-btn>
         </v-col>
       </v-row>
     </div>
@@ -387,6 +418,44 @@ const handlePageChange = async (page) => {
     filters.value
   );
 };
+
+// Array de meses
+const months = [
+  { title: 'Janeiro', value: 1 },
+  { title: 'Fevereiro', value: 2 },
+  { title: 'Março', value: 3 },
+  { title: 'Abril', value: 4 },
+  { title: 'Maio', value: 5 },
+  { title: 'Junho', value: 6 },
+  { title: 'Julho', value: 7 },
+  { title: 'Agosto', value: 8 },
+  { title: 'Setembro', value: 9 },
+  { title: 'Outubro', value: 10 },
+  { title: 'Novembro', value: 11 },
+  { title: 'Dezembro', value: 12 }
+];
+
+// Array de anos (dinâmico)
+const years = [2024, 2025].map(year => ({ title: year.toString(), value: year }));
+
+const selectedMonth = ref(null);
+const selectedYear = ref(new Date().getFullYear());
+
+const applyDateFilter = async () => {
+  if (!selectedMonth.value || !selectedYear.value) return;
+
+  await tasksStore.getTasks(
+    search.value,
+    selectedSegment.value,
+    pagination.value.current_page,
+    {
+      ...filters.value,
+      show_all: true, // Sempre mostra todos quando filtrando por data
+      filter_month: selectedMonth.value,
+      filter_year: selectedYear.value
+    }
+  );
+};
 </script>
 <style scoped>
 .d-flex {
@@ -419,6 +488,10 @@ const handlePageChange = async (page) => {
 }
 
 .v-switch {
+  margin-top: 0;
+}
+
+.v-select {
   margin-top: 0;
 }
 </style>
