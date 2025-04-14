@@ -16,8 +16,12 @@ jobs:
         - name: Setup nodejs
           uses: actions/setup-node@master
         
-        - name: Npm Install | npm build
+        - name: Npm Install | npm build with VITE secrets
           run: |
+            echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
+            echo "VITE_S3_URL=${{ secrets.VITE_S3_URL }}" >> .env
+            echo "VITE_PUSHER_KEY=${{ secrets.VITE_PUSHER_KEY }}" >> .env
+            echo "VITE_PUSHER_CLUSTER=${{ secrets.VITE_PUSHER_CLUSTER }}" >> .env
             npm install
             npm run build
         
