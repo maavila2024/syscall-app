@@ -397,7 +397,7 @@
       
       <v-pagination
         v-model="currentPage"
-        :length="pagination.last_page"
+        :length="totalPages"
         :total-visible="7"
         @update:model-value="handlePageChange"
       ></v-pagination>
@@ -431,7 +431,7 @@ const { tasks, toShow, toEdit, toDelete, taskFiles, pagination } = storeToRefs(t
 const isAdmin = computed(() =>
   meStore.user.teams.some((team) => team.is_admin)
 );
-const emit = defineEmits(["update:filters"]);
+const emit = defineEmits(["update:filters", "update:page"]);
 
 // Filtros para cada coluna
 const selectedStatuses = ref([]);
@@ -651,9 +651,11 @@ const handleExportCSV = () => {
 };
 
 const currentPage = ref(1);
+const totalPages = computed(() => Math.ceil(tasksStore.pagination.total / tasksStore.pagination.per_page));
 
 const handlePageChange = (page) => {
-  tasksStore.getTasks('', selectedSegment.value, page, currentFilters.value);
+  currentPage.value = page;
+  emit('update:page', page);
 };
 </script>
 
