@@ -63,51 +63,59 @@
           </div>
 
           <div class="filter-date-section" @click.stop>
-            <div class="text-caption text-grey mb-1">
-              Filtrar chamados por data de conclusão:
-            </div>
-            <div class="d-flex align-center">
-              <v-select
-                v-model="selectedMonth"
-                :items="months"
-                label="Mês"
-                hide-details
-                class="mr-2"
-                density="compact"
-                style="min-width: 180px; max-width: 200px"
-                variant="outlined"
-              ></v-select>
-
-              <v-select
-                v-model="selectedYear"
-                :items="years"
-                label="Ano"
-                hide-details
-                class="mr-4"
-                density="compact"
-                style="min-width: 120px; max-width: 130px"
-                variant="outlined"
-              ></v-select>
-
+            <!-- Seção de Paginação -->
+            <div class="pagination-section mr-4">
+              <div class="text-caption text-grey mb-1">
+                Selecione a quantidade de chamados por página:
+              </div>
               <v-select
                 v-model="perPage"
                 :items="paginationOptions"
-                label="Registros por página"
+                label="Registros"
                 hide-details
                 density="compact"
                 style="min-width: 100px; max-width: 120px"
                 variant="outlined"
-                class="mr-4"
                 @update:model-value="handlePerPageChange"
               ></v-select>
+            </div>
 
-              <v-btn 
-                color="primary" 
-                @click="applyDateFilter"
-                :disabled="!selectedMonth || !selectedYear"
-              >
-                Filtrar
-              </v-btn>
+            <!-- Seção de Filtro por Data -->
+            <div class="date-filter-section">
+              <div class="text-caption text-grey mb-1">
+                Filtrar chamados por data de conclusão:
+              </div>
+              <div class="d-flex align-center">
+                <v-select
+                  v-model="selectedMonth"
+                  :items="months"
+                  label="Mês"
+                  hide-details
+                  class="mr-2"
+                  density="compact"
+                  style="min-width: 180px; max-width: 200px"
+                  variant="outlined"
+                ></v-select>
+
+                <v-select
+                  v-model="selectedYear"
+                  :items="years"
+                  label="Ano"
+                  hide-details
+                  class="mr-4"
+                  density="compact"
+                  style="min-width: 120px; max-width: 130px"
+                  variant="outlined"
+                ></v-select>
+
+                <v-btn 
+                  color="primary" 
+                  @click="applyDateFilter"
+                  :disabled="!selectedMonth || !selectedYear"
+                >
+                  Filtrar
+                </v-btn>
+              </div>
             </div>
           </div>
         </v-col>
@@ -569,6 +577,13 @@ const handlePerPageChange = async (value) => {
 }
 
 .filter-date-section {
+  display: flex;
+  align-items: flex-start; /* Alinha os elementos pelo topo */
+  gap: 24px; /* Espaçamento entre as seções */
+}
+
+.pagination-section,
+.date-filter-section {
   display: flex;
   flex-direction: column;
 }
