@@ -363,7 +363,7 @@ const handleShowAllChange = async (value) => {
   await tasksStore.getTasks(
     search.value,
     selectedSegment.value,
-    pagination.value.current_page,
+    1,
     {
       ...filters.value,
       show_all: value
@@ -387,7 +387,7 @@ watch(
     console.log("Filters or page changed, fetching tasks...");
     fetchTasksDebounced(pagination.value.current_page);
   },
-  { deep: true } // Monitora alterações profundas no objeto `filters`
+  { deep: true }
 );
 
 watch(() => pagination.value.current_page, () => {
