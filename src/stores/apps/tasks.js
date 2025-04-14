@@ -32,7 +32,7 @@ export const useTasksStore = defineStore('tasks', {
           segment,
           page,
           per_page: 15,
-          show_all: false,
+          show_all: filters.show_all || false,
           sort_by: filters.sortBy || 'created_at',
           sort_order: filters.sortOrder || 'desc',
           ...filters

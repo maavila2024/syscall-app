@@ -12,7 +12,7 @@
             variant="outlined"
           ></v-text-field>
         </v-col>
-        <v-col cols="12" lg="6" md="4" class="d-flex align-center">
+        <v-col cols="12" lg="5" md="4" class="d-flex align-center">
           <label class="mr-4">Segmento:</label>
           <v-radio-group
             v-model="selectedSegment"
@@ -26,7 +26,16 @@
             <v-radio label="Proteína" value="2"></v-radio>
           </v-radio-group>
         </v-col>
-        <v-col cols="12" lg="3" md="4" class="text-right">
+        <v-col cols="12" lg="2" md="2" class="d-flex align-center">
+          <v-switch
+            v-model="showAllTasks"
+            label="Mostrar Todos Chamados"
+            color="primary"
+            hide-details
+            @change="handleShowAllChange"
+          ></v-switch>
+        </v-col>
+        <v-col cols="12" lg="2" md="2" class="text-right">
           <v-dialog width="800" persistent>
             <template #activator="{ props: activatorProps }">
               <v-btn flat color="primary" v-bind="activatorProps"
@@ -288,6 +297,7 @@ const filters = computed(() => ({
   userOwner: selectedOwners.value || null,
 }));
 
+const showAllTasks = ref(false);
 
 const applyFilters = (newFilters) => {
   console.log("Filters received:", newFilters); 
@@ -300,7 +310,6 @@ const applyFilters = (newFilters) => {
   console.log("Updated Filters:", filters.value); // Log dos filtros atualizados
   fetchTasksDebounced(pagination.value.current_page);
 };
-
 
 function debounce(fn, delay) {
   let timeoutID;
@@ -319,16 +328,27 @@ const updateUserSegment = async () => {
   }
 };
 
+const handleShowAllChange = async (value) => {
+  await tasksStore.getTasks(
+    search.value,
+    selectedSegment.value,
+    pagination.value.current_page,
+    {
+      ...filters.value,
+      show_all: value
+    }
+  );
+};
+
 const fetchTasksDebounced = debounce(async () => {
   const page = pagination.value.current_page;
   const query = search.value || "";
   
-  console.log("Sending request with filters:", filters.value); 
-  await tasksStore.getTasks(query, selectedSegment.value, page, filters.value);
+  await tasksStore.getTasks(query, selectedSegment.value, page, {
+    ...filters.value,
+    show_all: showAllTasks.value
+  });
 }, 2000);
-
-
-
 
 watch(
   [search, selectedSegment, filters],
@@ -339,11 +359,9 @@ watch(
   { deep: true } // Monitora alterações profundas no objeto `filters`
 );
 
-
 watch(() => pagination.value.current_page, () => {
   fetchTasksDebounced();
 });
-
 
 onMounted(() => {
   const query = route.query.search || "";
@@ -356,8 +374,6 @@ onMounted(() => {
     fetchTasksDebounced(pagination.value.current_page);
   }
 });
-
-
 
 watch(search, (newSearch) => {
   tasksStore.getTasks(newSearch);
@@ -400,5 +416,9 @@ const handlePageChange = async (page) => {
 
 .radio-button {
   margin-top: 24px;
+}
+
+.v-switch {
+  margin-top: 0;
 }
 </style>
