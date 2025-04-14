@@ -37,7 +37,7 @@ authStore
       >
         <div class="image-container">
           <img
-            src="@/assets/images/syscall/principal_syscall.jpg"
+            src="@/assets/images/syscall/principal_dcontrol.jpeg"
             class="login-image"
             alt="verify-email-background"
           />
