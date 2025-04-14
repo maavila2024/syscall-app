@@ -74,6 +74,17 @@ export const useMeStore = defineStore('me', {
         console.warn("Team token not found in user's teams");
       }
     },
+
+    async updateUserPreference(preference) {
+      try {
+        const response = await axios.patch('/api/me/preferences', preference);
+        this.user = response.data;
+        return response.data;
+      } catch (error) {
+        console.error('Error updating user preference:', error);
+        throw error;
+      }
+    }
   },
 
   getters: {

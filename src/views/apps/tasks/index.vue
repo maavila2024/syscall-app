@@ -89,17 +89,23 @@
                 variant="outlined"
               ></v-select>
 
+              <v-select
+                v-model="perPage"
+                :items="paginationOptions"
+                label="Registros por página"
+                hide-details
+                density="compact"
+                style="min-width: 100px; max-width: 120px"
+                variant="outlined"
+                class="mr-4"
+                @update:model-value="handlePerPageChange"
+              ></v-select>
+
               <v-btn 
                 color="primary" 
                 @click="applyDateFilter"
                 :disabled="!selectedMonth || !selectedYear"
               >
-                <v-tooltip
-                  activator="parent"
-                  location="top"
-                >
-                  Filtrar chamados pela data de conclusão
-                </v-tooltip>
                 Filtrar
               </v-btn>
             </div>
@@ -492,6 +498,36 @@ const applyDateFilter = async () => {
       filter_year: selectedYear.value
     }
   );
+};
+
+// Opções de paginação
+const paginationOptions = [
+  { title: '5 registros', value: 5 },
+  { title: '10 registros', value: 10 },
+  { title: '15 registros', value: 15 }
+];
+
+const perPage = ref(meStore.user?.default_pagination || 5);
+
+// Função para atualizar a preferência do usuário
+const handlePerPageChange = async (value) => {
+  try {
+    // Atualiza no backend
+    await meStore.updateUserPreference({ default_pagination: value });
+    
+    // Refaz a busca com nova paginação
+    await tasksStore.getTasks(
+      search.value,
+      selectedSegment.value,
+      1, // Volta para primeira página
+      {
+        ...filters.value,
+        per_page: value
+      }
+    );
+  } catch (error) {
+    console.error('Erro ao atualizar paginação:', error);
+  }
 };
 </script>
 <style scoped>
