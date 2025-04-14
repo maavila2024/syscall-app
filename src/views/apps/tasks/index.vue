@@ -363,15 +363,22 @@ const updateUserSegment = async () => {
 const handleShowAllChange = async (value) => {
   try {
     isLoading.value = true;
+
+    // Força atualização da página atual no store
+    pagination.value.current_page = 1;
+
     await tasksStore.getTasks(
       search.value,
       selectedSegment.value,
-      1, // Volta para primeira página
+      1, // Reinicia da primeira página
       {
         ...filters.value,
         show_all: value
       }
     );
+
+    // Força atualização da tabela
+    await fetchTasksDebounced();
   } finally {
     isLoading.value = false;
   }
