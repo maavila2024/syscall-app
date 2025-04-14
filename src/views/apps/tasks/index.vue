@@ -66,7 +66,7 @@
             <!-- Seção de Paginação -->
             <div class="pagination-section mr-4">
               <div class="text-caption text-grey mb-1">
-                Selecione a quantidade de chamados por página:
+                Quantidade de chamados por página:
               </div>
               <v-select
                 v-model="perPage"

@@ -25,13 +25,13 @@ export const useTasksStore = defineStore('tasks', {
   }),
 
   actions: {
-    async getTasks(search = '', segment = '0', page = 1, filters = {}) {
+    async getTasks(search = '', segment = '', page = 1, filters = {}) {
       try {
         const params = {
           search,
           segment,
           page,
-          per_page: 15,
+          per_page: filters.per_page || 5,
           show_all: filters.show_all || false,
           sort_by: filters.sortBy || 'created_at',
           sort_order: filters.sortOrder || 'desc',
@@ -40,14 +40,10 @@ export const useTasksStore = defineStore('tasks', {
 
         console.log('Requesting tasks with params:', params);
 
-        const response = await axios.get('api/tasks', { params });
+        const response = await axios.get('/api/tasks', { params });
         this.tasks = response.data.data;
-        this.pagination = {
-          current_page: response.data.current_page,
-          last_page: response.data.last_page,
-          per_page: response.data.per_page,
-          total: response.data.total,
-        };
+        this.pagination = response.data.meta;
+        return response.data;
       } catch (error) {
         console.error('Error fetching tasks:', error);
       }
