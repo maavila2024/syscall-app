@@ -58,6 +58,7 @@
             hide-details
             class="mr-4"
             @change="handleShowAllChange"
+            :loading="isLoading"
           ></v-switch>
 
           <v-select
@@ -360,26 +361,48 @@ const updateUserSegment = async () => {
 };
 
 const handleShowAllChange = async (value) => {
-  await tasksStore.getTasks(
-    search.value,
-    selectedSegment.value,
-    1,
-    {
-      ...filters.value,
-      show_all: value
-    }
-  );
+  try {
+    isLoading.value = true; // Ativa loading
+    
+    // Reseta a página para 1 e força atualização
+    pagination.value.current_page = 1;
+    
+    await tasksStore.getTasks(
+      search.value,
+      selectedSegment.value,
+      1,
+      {
+        ...filters.value,
+        show_all: value
+      }
+    );
+
+  } catch (error) {
+    console.error('Erro ao atualizar tasks:', error);
+  } finally {
+    isLoading.value = false; // Desativa loading
+  }
 };
 
-const fetchTasksDebounced = debounce(async () => {
+const fetchTasksDebounced = debounce(async (immediate = false) => {
   const page = pagination.value.current_page;
   const query = search.value || "";
   
-  await tasksStore.getTasks(query, selectedSegment.value, page, {
-    ...filters.value,
-    show_all: showAllTasks.value
-  });
-}, 2000);
+  try {
+    isLoading.value = true;
+    await tasksStore.getTasks(
+      query, 
+      selectedSegment.value, 
+      page, 
+      {
+        ...filters.value,
+        show_all: showAllTasks.value
+      }
+    );
+  } finally {
+    isLoading.value = false;
+  }
+}, immediate ? 0 : 2000);
 
 watch(
   [search, selectedSegment, filters],
