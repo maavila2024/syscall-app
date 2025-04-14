@@ -71,7 +71,9 @@
                 label="Mês"
                 hide-details
                 class="mr-2"
-                style="max-width: 150px"
+                density="compact"
+                style="min-width: 180px; max-width: 200px"
+                variant="outlined"
               ></v-select>
 
               <v-select
@@ -80,7 +82,9 @@
                 label="Ano"
                 hide-details
                 class="mr-4"
-                style="max-width: 100px"
+                density="compact"
+                style="min-width: 120px; max-width: 130px"
+                variant="outlined"
               ></v-select>
 
               <v-btn 
