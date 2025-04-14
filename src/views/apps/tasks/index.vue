@@ -60,31 +60,44 @@
             @change="handleShowAllChange"
           ></v-switch>
 
-          <v-select
-            v-model="selectedMonth"
-            :items="months"
-            label="Mês"
-            hide-details
-            class="mr-2"
-            style="max-width: 150px"
-          ></v-select>
+          <div class="filter-date-section">
+            <div class="text-caption text-grey mb-1">
+              Filtrar chamados por data de conclusão:
+            </div>
+            <div class="d-flex align-center">
+              <v-select
+                v-model="selectedMonth"
+                :items="months"
+                label="Mês"
+                hide-details
+                class="mr-2"
+                style="max-width: 150px"
+              ></v-select>
 
-          <v-select
-            v-model="selectedYear"
-            :items="years"
-            label="Ano"
-            hide-details
-            class="mr-4"
-            style="max-width: 100px"
-          ></v-select>
+              <v-select
+                v-model="selectedYear"
+                :items="years"
+                label="Ano"
+                hide-details
+                class="mr-4"
+                style="max-width: 100px"
+              ></v-select>
 
-          <v-btn 
-            color="primary" 
-            @click="applyDateFilter"
-            :disabled="!selectedMonth || !selectedYear"
-          >
-            Filtrar por Data
-          </v-btn>
+              <v-btn 
+                color="primary" 
+                @click="applyDateFilter"
+                :disabled="!selectedMonth || !selectedYear"
+              >
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                >
+                  Filtrar chamados pela data de conclusão
+                </v-tooltip>
+                Filtrar
+              </v-btn>
+            </div>
+          </div>
         </v-col>
       </v-row>
     </div>
@@ -511,5 +524,14 @@ const applyDateFilter = async () => {
 
 .v-select {
   margin-top: 0;
+}
+
+.filter-date-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.text-caption {
+  font-size: 0.75rem;
 }
 </style>
