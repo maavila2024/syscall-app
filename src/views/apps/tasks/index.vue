@@ -60,6 +60,7 @@
         @addNote="openAddNoteModal"
         @openAttachments="openAttachmentsModal"
         @update:filters="applyFilters"
+        @update:page="handlePageChange"
       />
       <!--
       <v-pagination
@@ -361,6 +362,15 @@ onMounted(() => {
 watch(search, (newSearch) => {
   tasksStore.getTasks(newSearch);
 });
+
+const handlePageChange = async (page) => {
+  await tasksStore.getTasks(
+    search.value, 
+    selectedSegment.value, 
+    page, 
+    filters.value
+  );
+};
 </script>
 <style scoped>
 .d-flex {
