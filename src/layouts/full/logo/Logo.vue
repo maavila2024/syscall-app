@@ -25,9 +25,23 @@ const dark = computed(() => {
 
 </script>
 <template>
-  <div class="">
-      <img src="@/assets/images/syscall/logo_syscall.jpg" class="position-relative d-none d-lg-flex logo-size"
-          alt="login-background" style="border-radius: 10px;"/>
+  <div class="logo-wrapper">
+    <v-img
+      src="@/assets/images/syscall/principal_dcontrol.jpeg"
+      class="position-relative d-none d-lg-flex"
+      max-width="180"
+      contain
+      style="border-radius: 10px;"
+    />
   </div>
 </template>
+
+<style scoped>
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+}
+</style>
 
