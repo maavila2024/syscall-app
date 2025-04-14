@@ -51,16 +51,18 @@
         </v-col>
 
         <v-col cols="12" lg="8" md="8" class="d-flex align-center">
-          <v-switch
-            v-model="showAllTasks"
-            label="Mostrar Todos Chamados"
-            color="primary"
-            hide-details
-            class="mr-4"
-            @change="handleShowAllChange"
-          ></v-switch>
+          <div class="switch-container mr-4">
+            <v-switch
+              v-model="showAllTasks"
+              label="Mostrar Todos Chamados"
+              color="primary"
+              hide-details
+              @change="handleShowAllChange"
+              @click.stop
+            ></v-switch>
+          </div>
 
-          <div class="filter-date-section">
+          <div class="filter-date-section" @click.stop>
             <div class="text-caption text-grey mb-1">
               Filtrar chamados por data de conclusão:
             </div>
@@ -537,5 +539,10 @@ const applyDateFilter = async () => {
 
 .text-caption {
   font-size: 0.75rem;
+}
+
+.switch-container {
+  display: flex;
+  align-items: center;
 }
 </style>
