@@ -58,7 +58,6 @@
             hide-details
             class="mr-4"
             @change="handleShowAllChange"
-            :loading="isLoading"
           ></v-switch>
 
           <v-select
@@ -219,7 +218,8 @@ const { toShow, toEdit, toDelete } = storeToRefs(tasksStore);
 const chatStore = useChatStore();
 const { messages } = storeToRefs(chatStore);
 
-const { isLoading } = useAsyncState(tasksStore.getTasks());
+const isLoading = ref(false);
+
 const { priori } = useAsyncState(tasksStore.getPriorities());
 const { complexity } = useAsyncState(tasksStore.getComplexities());
 const { tasksStatus } = useAsyncState(tasksStore.getTasksStatus());
@@ -362,47 +362,35 @@ const updateUserSegment = async () => {
 
 const handleShowAllChange = async (value) => {
   try {
-    isLoading.value = true; // Ativa loading
-    
-    // Reseta a página para 1 e força atualização
-    pagination.value.current_page = 1;
-    
+    isLoading.value = true;
     await tasksStore.getTasks(
       search.value,
       selectedSegment.value,
-      1,
+      1, // Volta para primeira página
       {
         ...filters.value,
         show_all: value
       }
     );
-
-  } catch (error) {
-    console.error('Erro ao atualizar tasks:', error);
-  } finally {
-    isLoading.value = false; // Desativa loading
-  }
-};
-
-const fetchTasksDebounced = debounce(async (immediate = false) => {
-  const page = pagination.value.current_page;
-  const query = search.value || "";
-  
-  try {
-    isLoading.value = true;
-    await tasksStore.getTasks(
-      query, 
-      selectedSegment.value, 
-      page, 
-      {
-        ...filters.value,
-        show_all: showAllTasks.value
-      }
-    );
   } finally {
     isLoading.value = false;
   }
-}, immediate ? 0 : 2000);
+};
+
+const fetchTasksDebounced = debounce(async () => {
+  const page = pagination.value.current_page;
+  const query = search.value || "";
+  
+  await tasksStore.getTasks(
+    query, 
+    selectedSegment.value, 
+    page, 
+    {
+      ...filters.value,
+      show_all: showAllTasks.value
+    }
+  );
+}, 2000);
 
 watch(
   [search, selectedSegment, filters],
