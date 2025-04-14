@@ -291,7 +291,7 @@ const { handleSubmit, errors, isSubmitting, setFieldValue, setErrors } = useForm
       .typeError('Responsável é obrigatório'),
     task_status_id: number().required().label('Status do Chamado'),
     priority_id: number().required().label('Prioridade do Chamado'),
-    complexity_id: number().nullable().label('Complexidade do Chamado'),
+    complexity_id: number().nullable(),
     observation: string().nullable().label('Observação'),
     created_at: date().nullable().label('Data de Criação'),
     expected_date: date().nullable().label('Data de Criação').transform((value, originalValue) => originalValue === '' ? null : value),
@@ -363,6 +363,11 @@ const submit = handleSubmit(async (payload) => {
   }
   if (!finish_date.value) {
     payload.finish_date = null;
+  }
+
+  if (!payload.complexity_id) {
+    payload.complexity_id = 4;
+    payload.complexity_justification = '';
   }
 
   console.log('Payload being sent to the backend:', payload);
