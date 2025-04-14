@@ -406,4 +406,16 @@ watch(priority_id, (newVal) => {
     setFieldValue('priority_justification', priority_justification.value || '');
   }
 });
+
+// Adicionando watch para monitorar mudanças no status
+watch(task_status_id, (newStatusId) => {
+  // Se o novo status é Concluído (5) ou Cancelado (9) e não tem data de conclusão
+  if ((newStatusId === 5 || newStatusId === 9) && !finish_date.value) {
+    // Seta a data atual no formato YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0];
+    finish_date.value = today;
+    
+    console.log('Status alterado para Concluído/Cancelado. Data de conclusão definida:', today);
+  }
+});
 </script>
