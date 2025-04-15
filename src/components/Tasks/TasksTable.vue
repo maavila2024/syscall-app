@@ -429,7 +429,7 @@ const route = useRoute();
 const router = useRouter();
 const { tasks, toShow, toEdit, toDelete, taskFiles, pagination } = storeToRefs(tasksStore);
 const isAdmin = computed(() =>
-  meStore.user.teams.some((team) => team.is_admin)
+  meStore.user?.teams?.some(team => team.is_admin) || false
 );
 const emit = defineEmits(["update:filters", "update:page"]);
 
