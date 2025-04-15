@@ -150,19 +150,23 @@ const handleShowAllChange = async (value) => {
 };
 
 const perPage = computed({
-  get: () => meStore.user?.default_pagination || 5,
+  get: () => meStore.user?.default_pagination || 15,
   set: async (value) => {
-    await meStore.updateUserPreference({ default_pagination: value });
-    await tasksStore.getTasks(
-      search.value, 
-      selectedSegment.value, 
-      1, 
-      {
-        ...filters.value,
-        per_page: value,
-      }
-    );
-  },
+    try {
+      await meStore.updateUserPreference({ default_pagination: value });
+      await tasksStore.getTasks(
+        search.value,
+        selectedSegment.value,
+        1,
+        {
+          ...filters.value,
+          per_page: value
+        }
+      );
+    } catch (error) {
+      console.error('Erro ao atualizar paginação:', error);
+    }
+  }
 });
 
 const fetchTasksDebounced = debounce(async () => {
@@ -192,9 +196,6 @@ watch(() => pagination.value.current_page, () => {
 
 onMounted(async () => {
   await meStore.getMe();
-  if (meStore.user?.default_pagination) {
-    perPage.value = meStore.user.default_pagination;
-  }
   loggedInUserId.value = meStore.user?.id;
   selectedSegment.value = meStore.user?.default_segment || "0";
   isReadyToFetch.value = true;
@@ -213,15 +214,7 @@ onMounted(async () => {
     );
     isSpecificSearch.value = false;
   } else {
-    await tasksStore.getTasks(
-      search.value,
-      selectedSegment.value,
-      pagination.value.current_page,
-      {
-        ...filters.value,
-        per_page: perPage.value
-      }
-    );
+    await fetchTasksDebounced();
   }
 });
 
@@ -359,13 +352,16 @@ const applyDateFilter = async () => {
               </div>
               <v-select
                 v-model="perPage"
-                :items="paginationOptions"
+                :items="[
+                  { title: '5 registros', value: 5 },
+                  { title: '10 registros', value: 10 },
+                  { title: '15 registros', value: 15 }
+                ]"
                 label="Registros"
                 hide-details
                 density="compact"
                 style="min-width: 100px; max-width: 120px"
                 variant="outlined"
-                @update:model-value="handlePerPageChange"
               ></v-select>
             </div>
 

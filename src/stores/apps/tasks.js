@@ -31,7 +31,7 @@ export const useTasksStore = defineStore('tasks', {
           search,
           segment,
           page,
-          per_page: filters.per_page || 5,
+          per_page: filters.per_page || 15,
           show_all: filters.show_all || false,
           sort_by: filters.sortBy || 'created_at',
           sort_order: filters.sortOrder || 'desc',
