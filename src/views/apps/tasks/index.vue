@@ -24,6 +24,7 @@ const chatStore = useChatStore();
 const { messages } = storeToRefs(chatStore);
 
 const isLoading = ref(false);
+const isReadyToFetch = ref(false);
 
 const { priori } = useAsyncState(tasksStore.getPriorities());
 const { complexity } = useAsyncState(tasksStore.getComplexities());
@@ -32,21 +33,15 @@ const { users } = useAsyncState(tasksStore.getUsers());
 
 const isEditing = computed({
   get: () => !!Object.keys(toEdit.value).length,
-  set: (value) => {
-    if (!value) toEdit.value = {};
-  },
+  set: (value) => { if (!value) toEdit.value = {}; },
 });
 const isShowing = computed({
   get: () => !!Object.keys(toShow.value).length,
-  set: (value) => {
-    if (!value) toShow.value = {};
-  },
+  set: (value) => { if (!value) toShow.value = {}; },
 });
 const isDeleting = computed({
   get: () => !!Object.keys(toDelete.value).length,
-  set: (value) => {
-    if (!value) toDelete.value = {};
-  },
+  set: (value) => { if (!value) toDelete.value = {}; },
 });
 
 const deleting = ref(false);
@@ -61,7 +56,7 @@ const showChatModal = ref(false);
 const selectedTaskId = ref(0);
 const showAddNoteModal = ref(false);
 const newNote = ref("");
-const loggedInUserId = ref(meStore.user?.id);
+const loggedInUserId = ref(null);
 
 const openChatModal = (task) => {
   if (task?.id) {
@@ -91,7 +86,7 @@ const openAttachmentsModal = (task) => {
 
 const search = ref("");
 const isSpecificSearch = ref(false);
-const selectedSegment = ref(meStore.user?.default_segment || "0");
+const selectedSegment = ref("0");
 
 const selectedPriorities = ref(null);
 const selectedComplexities = ref(null);
@@ -115,8 +110,7 @@ const applyFilters = (newFilters) => {
   selectedStatuses.value = newFilters.taskStatus || null;
   selectedResponsibles.value = newFilters.userResponsible || null;
   selectedOwners.value = newFilters.userOwner || null;
-
-  fetchTasksDebounced(pagination.value.current_page);
+  if (isReadyToFetch.value) fetchTasksDebounced(pagination.value.current_page);
 };
 
 function debounce(fn, delay) {
@@ -130,7 +124,7 @@ function debounce(fn, delay) {
 const updateUserSegment = async () => {
   try {
     await meStore.updateUserSegment(selectedSegment.value);
-    fetchTasksDebounced(pagination.value.current_page);
+    if (isReadyToFetch.value) fetchTasksDebounced(pagination.value.current_page);
   } catch (error) {
     console.error("Failed to update user segment:", error);
   }
@@ -150,16 +144,16 @@ const handleShowAllChange = async (value) => {
         per_page: perPage.value,
       }
     );
-    await fetchTasksDebounced();
+    if (isReadyToFetch.value) fetchTasksDebounced();
   } finally {
     isLoading.value = false;
   }
 };
 
-// 🔁 Ref atualizado com valor padrão, que será preenchido após carregar o usuário
 const perPage = ref(5);
 
 const fetchTasksDebounced = debounce(async () => {
+  if (!isReadyToFetch.value) return;
   const page = pagination.value.current_page;
   const query = search.value || "";
   await tasksStore.getTasks(query, selectedSegment.value, page, {
@@ -170,19 +164,21 @@ const fetchTasksDebounced = debounce(async () => {
 }, 2000);
 
 watch([search, selectedSegment, filters], () => {
-  fetchTasksDebounced(pagination.value.current_page);
+  if (isReadyToFetch.value) fetchTasksDebounced(pagination.value.current_page);
 }, { deep: true });
 
 watch(() => pagination.value.current_page, () => {
-  fetchTasksDebounced();
+  if (isReadyToFetch.value) fetchTasksDebounced();
 });
 
 onMounted(async () => {
   await meStore.getMe();
-
   if (meStore.user?.default_pagination) {
     perPage.value = meStore.user.default_pagination;
   }
+  loggedInUserId.value = meStore.user?.id;
+  selectedSegment.value = meStore.user?.default_segment || "0";
+  isReadyToFetch.value = true;
 
   const query = route.query.search || "";
   if (query) {
@@ -206,7 +202,7 @@ onMounted(async () => {
 });
 
 watch(search, (newSearch) => {
-  tasksStore.getTasks(newSearch);
+  if (isReadyToFetch.value) tasksStore.getTasks(newSearch);
 });
 
 const handlePageChange = async (page) => {
