@@ -152,14 +152,19 @@ const handleShowAllChange = async (value) => {
 const perPage = ref(5);
 
 const fetchTasksDebounced = debounce(async () => {
-  if (!isReadyToFetch.value) return;
   const page = pagination.value.current_page;
   const query = search.value || "";
-  await tasksStore.getTasks(query, selectedSegment.value, page, {
-    ...filters.value,
-    show_all: showAllTasks.value,
-    per_page: perPage.value,
-  });
+  
+  await tasksStore.getTasks(
+    query, 
+    selectedSegment.value, 
+    page, 
+    {
+      ...filters.value,
+      show_all: showAllTasks.value,
+      per_page: meStore.user?.default_pagination || 5
+    }
+  );
 }, 2000);
 
 watch([search, selectedSegment, filters], () => {
@@ -181,22 +186,17 @@ onMounted(async () => {
 
   const query = route.query.search || "";
   if (query) {
-    isSpecificSearch.value = true;
-    await tasksStore.getTasks(query, selectedSegment.value, pagination.value.current_page, {
-      ...filters.value,
-      per_page: perPage.value,
-    });
-    isSpecificSearch.value = false;
-  } else {
     await tasksStore.getTasks(
-      search.value,
-      selectedSegment.value,
-      pagination.value.current_page,
+      query, 
+      selectedSegment.value, 
+      pagination.value.current_page, 
       {
         ...filters.value,
-        per_page: perPage.value,
+        per_page: meStore.user?.default_pagination || 5
       }
     );
+  } else {
+    await fetchTasksDebounced();
   }
 });
 
