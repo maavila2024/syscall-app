@@ -277,13 +277,162 @@ const applyDateFilter = async () => {
 </script>
 
 <template>
-  <TasksTable
-    :tasks="tasks"
-    :pagination="pagination"
-    @update:filters="applyFilters"
-    @update:page="handlePageChange"
-    @openChat="openChatModal"
-    @openAttachments="openAttachmentsModal"
-  />
-  <!-- resto do template -->
+  <v-card class="pa-4">
+    <div class="d-flex justify-space-between align-center mb-4">
+      <div class="d-flex align-center">
+        <div class="me-4">
+          <v-text-field
+            v-model="search"
+            label="Pesquisar Chamados"
+            variant="outlined"
+            density="compact"
+            hide-details
+            class="custom-search-field"
+            prepend-inner-icon="mdi-magnify"
+          ></v-text-field>
+        </div>
+        <div class="me-4">
+          <v-radio-group v-model="selectedSegment" row @change="updateUserSegment">
+            <v-radio label="Todos" value="0"></v-radio>
+            <v-radio label="Grãos" value="1"></v-radio>
+            <v-radio label="Proteína" value="2"></v-radio>
+          </v-radio-group>
+        </div>
+      </div>
+
+      <div class="d-flex align-center">
+        <!-- Quantidade de registros por página -->
+        <v-select
+          v-model="perPage"
+          :items="paginationOptions"
+          item-title="title"
+          item-value="value"
+          label="Quantidade de chamados por página"
+          variant="outlined"
+          density="compact"
+          hide-details
+          class="me-4"
+          style="width: 150px"
+          @update:model-value="handlePerPageChange"
+        ></v-select>
+
+        <!-- Filtro por data -->
+        <div class="d-flex align-center me-4">
+          <v-select
+            v-model="selectedMonth"
+            :items="months"
+            item-title="title"
+            item-value="value"
+            label="Mês"
+            variant="outlined"
+            density="compact"
+            hide-details
+            class="me-2"
+            style="width: 150px"
+          ></v-select>
+
+          <v-select
+            v-model="selectedYear"
+            :items="years"
+            item-title="title"
+            item-value="value"
+            label="Ano"
+            variant="outlined"
+            density="compact"
+            hide-details
+            class="me-2"
+            style="width: 120px"
+          ></v-select>
+
+          <v-btn
+            color="primary"
+            variant="tonal"
+            size="small"
+            @click="applyDateFilter"
+          >
+            Filtrar
+          </v-btn>
+        </div>
+
+        <!-- Toggle para mostrar todos os chamados -->
+        <v-switch
+          v-model="showAllTasks"
+          label="Mostrar Todos Chamados"
+          hide-details
+          class="me-4"
+          @change="handleShowAllChange"
+        ></v-switch>
+
+        <v-btn
+          color="primary"
+          variant="flat"
+          size="small"
+          to="/apps/tasks/add"
+          class="ml-2"
+        >
+          Novo Chamado
+        </v-btn>
+      </div>
+    </div>
+
+    <TasksTable
+      :tasks="tasks"
+      :pagination="pagination"
+      @update:filters="applyFilters"
+      @update:page="handlePageChange"
+      @openChat="openChatModal"
+      @openAttachments="openAttachmentsModal"
+    />
+
+    <!-- Modais -->
+    <v-dialog v-model="showChatModal" width="800">
+      <TaskChat
+        :task-id="selectedTaskId"
+        :messages="messages"
+        @close="showChatModal = false"
+      />
+    </v-dialog>
+
+    <v-dialog v-model="showAttachmentsModal" width="800">
+      <TaskAttachments
+        :task-id="selectedTaskId"
+        @close="showAttachmentsModal = false"
+      />
+    </v-dialog>
+
+    <v-dialog v-model="isEditing" width="800">
+      <TaskEditForm
+        :task="toEdit"
+        @close="isEditing = false"
+        @saved="isEditing = false"
+      />
+    </v-dialog>
+
+    <v-dialog v-model="isShowing" width="800">
+      <TaskShowForm :task="toShow" @close="isShowing = false" />
+    </v-dialog>
+
+    <v-dialog v-model="isDeleting" width="500">
+      <v-card>
+        <v-card-text class="pa-6">
+          <p class="text-h6 mb-2">Confirmar exclusão</p>
+          <p>Deseja realmente excluir este chamado?</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="error"
+            variant="text"
+            :loading="deleting"
+            @click="deleteTask(toDelete)"
+          >
+            Excluir
+          </v-btn>
+          <v-btn color="default" variant="text" @click="isDeleting = false">
+            Cancelar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-card>
 </template>
