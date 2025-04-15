@@ -651,7 +651,10 @@ const handleExportCSV = () => {
   exportToCSV(filteredTasks.value, "tasks.csv");
 };
 
-const currentPage = ref(1);
+const currentPage = computed({
+  get: () => pagination.value.current_page,
+  set: (value) => emit('update:page', value),
+});
 const totalPages = computed(() => Math.ceil(tasksStore.pagination.total / tasksStore.pagination.per_page));
 
 const handlePageChange = (page) => {
