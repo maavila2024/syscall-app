@@ -149,9 +149,24 @@ const handleShowAllChange = async (value) => {
   }
 };
 
-const perPage = ref(5);
+const perPage = computed({
+  get: () => meStore.user?.default_pagination || 5,
+  set: async (value) => {
+    await meStore.updateUserPreference({ default_pagination: value });
+    await tasksStore.getTasks(
+      search.value, 
+      selectedSegment.value, 
+      1, 
+      {
+        ...filters.value,
+        per_page: value,
+      }
+    );
+  },
+});
 
 const fetchTasksDebounced = debounce(async () => {
+  if (!isReadyToFetch.value) return;
   const page = pagination.value.current_page;
   const query = search.value || "";
   
@@ -162,7 +177,7 @@ const fetchTasksDebounced = debounce(async () => {
     {
       ...filters.value,
       show_all: showAllTasks.value,
-      per_page: meStore.user?.default_pagination || 5
+      per_page: perPage.value
     }
   );
 }, 2000);
@@ -186,17 +201,27 @@ onMounted(async () => {
 
   const query = route.query.search || "";
   if (query) {
+    isSpecificSearch.value = true;
     await tasksStore.getTasks(
       query, 
       selectedSegment.value, 
       pagination.value.current_page, 
       {
         ...filters.value,
-        per_page: meStore.user?.default_pagination || 5
+        per_page: perPage.value
       }
     );
+    isSpecificSearch.value = false;
   } else {
-    await fetchTasksDebounced();
+    await tasksStore.getTasks(
+      search.value,
+      selectedSegment.value,
+      pagination.value.current_page,
+      {
+        ...filters.value,
+        per_page: perPage.value
+      }
+    );
   }
 });
 
