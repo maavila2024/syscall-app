@@ -30,17 +30,32 @@ const { complexity } = useAsyncState(tasksStore.getComplexities());
 const { tasksStatus } = useAsyncState(tasksStore.getTasksStatus());
 const { users } = useAsyncState(tasksStore.getUsers());
 
+const showEditDialog = ref(false);
+const showViewDialog = ref(false);
+const showDeleteDialog = ref(false);
+
 const isEditing = computed({
-  get: () => !!Object.keys(toEdit.value).length,
-  set: (value) => { if (!value) toEdit.value = {}; },
+  get: () => showEditDialog.value,
+  set: (value) => {
+    showEditDialog.value = value;
+    if (!value) toEdit.value = {};
+  },
 });
+
 const isShowing = computed({
-  get: () => !!Object.keys(toShow.value).length,
-  set: (value) => { if (!value) toShow.value = {}; },
+  get: () => showViewDialog.value,
+  set: (value) => {
+    showViewDialog.value = value;
+    if (!value) toShow.value = {};
+  },
 });
+
 const isDeleting = computed({
-  get: () => !!Object.keys(toDelete.value).length,
-  set: (value) => { if (!value) toDelete.value = {}; },
+  get: () => showDeleteDialog.value,
+  set: (value) => {
+    showDeleteDialog.value = value;
+    if (!value) toDelete.value = {};
+  },
 });
 
 const deleting = ref(false);
@@ -304,6 +319,16 @@ const handleAddSuccess = async () => {
     filters.value
   );
 };
+
+const handleEditSuccess = async () => {
+  showEditDialog.value = false;
+  await tasksStore.getTasks(
+    search.value,
+    selectedSegment.value,
+    pagination.value.current_page,
+    filters.value
+  );
+};
 </script>
 
 <template>
@@ -466,36 +491,47 @@ const handleAddSuccess = async () => {
       />
     </v-dialog>
 
-    <v-dialog v-model="isEditing" width="800">
-      <TaskEditForm
-        :task="toEdit"
-        @close="isEditing = false"
-        @saved="isEditing = false"
-      />
+    <v-dialog v-model="showEditDialog" width="800" persistent>
+      <v-card width="800">
+        <v-card-title>Editar chamado</v-card-title>
+        <v-card-text>
+          <TaskEditForm
+            :task="toEdit"
+            @cancel="showEditDialog = false"
+            @edit="handleEditSuccess"
+          />
+        </v-card-text>
+      </v-card>
     </v-dialog>
 
-    <v-dialog v-model="isShowing" width="800">
-      <TaskShowForm :task="toShow" @close="isShowing = false" />
+    <v-dialog v-model="showViewDialog" width="800" persistent>
+      <v-card width="800">
+        <v-card-title>Visualizar chamado</v-card-title>
+        <v-card-text>
+          <TaskShowForm
+            :task="toShow"
+            @cancel="showViewDialog = false"
+          />
+        </v-card-text>
+      </v-card>
     </v-dialog>
 
-    <v-dialog v-model="isDeleting" width="500">
+    <v-dialog v-model="showDeleteDialog" width="400" persistent>
       <v-card>
-        <v-card-text class="pa-6">
-          <p class="text-h6 mb-2">Confirmar exclusão</p>
-          <p>Deseja realmente excluir este chamado?</p>
+        <v-card-title>Confirmação de Exclusão</v-card-title>
+        <v-card-text>
+          Você tem certeza que deseja deletar este chamado?
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
+          <v-btn @click="showDeleteDialog = false">Cancelar</v-btn>
           <v-btn
-            color="error"
-            variant="text"
-            :loading="deleting"
             @click="deleteTask(toDelete)"
+            variant="tonal"
+            color="error"
+            :loading="deleting"
           >
-            Excluir
-          </v-btn>
-          <v-btn color="default" variant="text" @click="isDeleting = false">
-            Cancelar
+            Deletar
           </v-btn>
         </v-card-actions>
       </v-card>
