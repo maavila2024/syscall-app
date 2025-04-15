@@ -277,113 +277,132 @@ const applyDateFilter = async () => {
 </script>
 
 <template>
-  <v-card class="pa-4">
-    <!-- Cabeçalho com filtros -->
-    <div class="d-flex justify-space-between align-center mb-4">
-      <!-- Lado esquerdo: Pesquisa e Segmentos -->
-      <div class="d-flex align-center">
-        <div class="me-4">
+  <div>
+    <div class="mb-5 pb-5 border-b border-opacity-100">
+      <!-- Primeira linha: Pesquisa e Botão Novo Chamado -->
+      <v-row align="center" justify="space-between" class="mb-4">
+        <v-col cols="12" lg="4" md="4">
           <v-text-field
+            density="compact"
             v-model="search"
             label="Pesquisar Chamados"
-            variant="outlined"
-            density="compact"
+            append-inner-icon="mdi-magnify"
             hide-details
-            class="custom-search-field"
-            prepend-inner-icon="mdi-magnify"
+            variant="outlined"
           ></v-text-field>
-        </div>
-        <div class="me-4">
-          <v-radio-group v-model="selectedSegment" row @change="updateUserSegment">
-            <v-radio label="Todos" value="0"></v-radio>
-            <v-radio label="Grãos" value="1"></v-radio>
+        </v-col>
+        <v-col cols="12" lg="2" md="2" class="text-right">
+          <v-btn flat color="primary" to="/apps/tasks/add">
+            Novo Chamado
+          </v-btn>
+        </v-col>
+      </v-row>
+
+      <!-- Segunda linha: Segmento e Filtros -->
+      <v-row align="center">
+        <v-col cols="12" lg="4" md="4" class="d-flex align-center">
+          <label class="mr-4">Segmento:</label>
+          <v-radio-group
+            v-model="selectedSegment"
+            @change="updateUserSegment"
+            row
+            inline
+            class="radio-button"
+          >
+            <v-radio label="Todos" value="0" class="mr-2"></v-radio>
+            <v-radio label="Grãos" value="1" class="mr-2"></v-radio>
             <v-radio label="Proteína" value="2"></v-radio>
           </v-radio-group>
-        </div>
-      </div>
+        </v-col>
 
-      <!-- Lado direito: Paginação, Filtros de Data e Botões -->
-      <div class="d-flex align-center">
-        <v-select
-          v-model="perPage"
-          :items="paginationOptions"
-          item-title="title"
-          item-value="value"
-          label="Quantidade de chamados por página"
-          variant="outlined"
-          density="compact"
-          hide-details
-          class="me-4"
-          style="width: 150px"
-          @update:model-value="handlePerPageChange"
-        ></v-select>
+        <v-col cols="12" lg="8" md="8" class="d-flex align-center">
+          <div class="switch-container mr-4">
+            <v-switch
+              v-model="showAllTasks"
+              label="Mostrar Todos Chamados"
+              color="primary"
+              hide-details
+              @change="handleShowAllChange"
+            ></v-switch>
+          </div>
 
-        <div class="d-flex align-center me-4">
-          <v-select
-            v-model="selectedMonth"
-            :items="months"
-            item-title="title"
-            item-value="value"
-            label="Mês"
-            variant="outlined"
-            density="compact"
-            hide-details
-            class="me-2"
-            style="width: 150px"
-          ></v-select>
+          <div class="filter-date-section">
+            <!-- Seção de Paginação -->
+            <div class="pagination-section mr-4">
+              <div class="text-caption text-grey mb-1">
+                Quantidade de chamados por página:
+              </div>
+              <v-select
+                v-model="perPage"
+                :items="paginationOptions"
+                label="Registros"
+                hide-details
+                density="compact"
+                style="min-width: 100px; max-width: 120px"
+                variant="outlined"
+                @update:model-value="handlePerPageChange"
+              ></v-select>
+            </div>
 
-          <v-select
-            v-model="selectedYear"
-            :items="years"
-            item-title="title"
-            item-value="value"
-            label="Ano"
-            variant="outlined"
-            density="compact"
-            hide-details
-            class="me-2"
-            style="width: 120px"
-          ></v-select>
+            <!-- Seção de Filtro por Data -->
+            <div class="date-filter-section">
+              <div class="text-caption text-grey mb-1">
+                Filtrar chamados por data de conclusão:
+              </div>
+              <div class="d-flex align-center">
+                <v-select
+                  v-model="selectedMonth"
+                  :items="months"
+                  label="Mês"
+                  hide-details
+                  class="mr-2"
+                  density="compact"
+                  style="min-width: 180px; max-width: 200px"
+                  variant="outlined"
+                ></v-select>
 
-          <v-btn
-            color="primary"
-            variant="tonal"
-            size="small"
-            @click="applyDateFilter"
-          >
-            Filtrar
-          </v-btn>
-        </div>
+                <v-select
+                  v-model="selectedYear"
+                  :items="years"
+                  label="Ano"
+                  hide-details
+                  class="mr-4"
+                  density="compact"
+                  style="min-width: 120px; max-width: 130px"
+                  variant="outlined"
+                ></v-select>
 
-        <v-switch
-          v-model="showAllTasks"
-          label="Mostrar Todos Chamados"
-          hide-details
-          class="me-4"
-          @change="handleShowAllChange"
-        ></v-switch>
-
-        <v-btn
-          color="primary"
-          variant="flat"
-          size="small"
-          to="/apps/tasks/add"
-          class="ml-2"
-        >
-          Novo Chamado
-        </v-btn>
-      </div>
+                <v-btn 
+                  color="primary" 
+                  @click="applyDateFilter"
+                  :disabled="!selectedMonth || !selectedYear"
+                >
+                  Filtrar
+                </v-btn>
+              </div>
+            </div>
+          </div>
+        </v-col>
+      </v-row>
     </div>
 
-    <!-- Tabela de Tasks -->
-    <TasksTable
-      :tasks="tasks"
-      :pagination="pagination"
-      @update:filters="applyFilters"
-      @update:page="handlePageChange"
-      @openChat="openChatModal"
-      @openAttachments="openAttachmentsModal"
+    <!-- Tabela e Loading -->
+    <v-progress-circular
+      v-if="isLoading"
+      :width="3"
+      color="primary"
+      indeterminate
     />
+    <template v-else>
+      <TasksTable
+        :tasks="tasks"
+        :pagination="pagination"
+        @openChat="openChatModal"
+        @openAttachments="openAttachmentsModal"
+        @update:filters="applyFilters"
+        @update:page="handlePageChange"
+      />
+    </template>
 
     <!-- Modais -->
     <v-dialog v-model="showChatModal" width="800">
@@ -435,5 +454,32 @@ const applyDateFilter = async () => {
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-card>
+  </div>
 </template>
+
+<style scoped>
+.filter-date-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.pagination-section,
+.date-filter-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.text-caption {
+  font-size: 0.75rem;
+}
+
+.switch-container {
+  display: flex;
+  align-items: center;
+}
+
+.radio-button {
+  margin-top: 24px;
+}
+</style>
