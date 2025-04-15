@@ -17,8 +17,7 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 const meStore = useMeStore();
 const tasksStore = useTasksStore();
-const { pagination } = storeToRefs(tasksStore);
-const { toShow, toEdit, toDelete } = storeToRefs(tasksStore);
+const { tasks, pagination, toShow, toEdit, toDelete } = storeToRefs(tasksStore);
 
 const chatStore = useChatStore();
 const { messages } = storeToRefs(chatStore);
@@ -276,3 +275,15 @@ const applyDateFilter = async () => {
   );
 };
 </script>
+
+<template>
+  <TasksTable
+    :tasks="tasks"
+    :pagination="pagination"
+    @update:filters="applyFilters"
+    @update:page="handlePageChange"
+    @openChat="openChatModal"
+    @openAttachments="openAttachmentsModal"
+  />
+  <!-- resto do template -->
+</template>

@@ -423,11 +423,22 @@ import { useRoute, useRouter } from "vue-router";
 import { exportToCSV } from "@/utils/exportToCSV";
 import { formatDateToBR } from '@/utils/helpers.js';
 
+// Definindo props
+const props = defineProps({
+  tasks: {
+    type: Array,
+    default: () => [],
+  },
+  pagination: {
+    type: Object,
+    required: true
+  }
+});
+
 const meStore = useMeStore();
 const tasksStore = useTasksStore();
 const route = useRoute();
 const router = useRouter();
-const { tasks, toShow, toEdit, toDelete, taskFiles, pagination } = storeToRefs(tasksStore);
 const isAdmin = computed(() =>
   Array.isArray(meStore.user?.teams) &&
   meStore.user.teams.some(team => team.is_admin) || false
@@ -450,23 +461,23 @@ const showComplexityFilter = ref(false);
 
 // Opções de filtros únicas
 const statusOptions = computed(() => [
-  ...new Set(tasks.value.map((task) => task.task_status.name)),
+  ...new Set(props.tasks.map((task) => task.task_status?.name)),
 ]);
 const ownerOptions = computed(() => [
-  ...new Set(tasks.value.map((task) => task.user_owner.first_name)),
+  ...new Set(props.tasks.map((task) => task.user_owner?.first_name)),
 ]);
 const responsibleOptions = computed(() => [
   ...new Set(
-    tasks.value.map(
+    props.tasks.map(
       (task) => task.user_responsible?.first_name || "Nenhum responsável"
     )
   ),
 ]);
 const priorityOptions = computed(() => [
-  ...new Set(tasks.value.map((task) => task.priority.name)),
+  ...new Set(props.tasks.map((task) => task.priority.name)),
 ]);
 const complexityOptions = computed(() => [
-  ...new Set(tasks.value.map((task) => task.complexity?.name || "Em análise")),
+  ...new Set(props.tasks.map((task) => task.complexity?.name || "Em análise")),
 ]);
 
 // Estado do checkbox "Selecionar todos"
@@ -569,7 +580,7 @@ const sortTable = (key) => {
 };
 
 const sortedTasks = computed(() => {
-  const sorted = [...tasks.value];
+  const sorted = [...props.tasks];
   sorted.sort((a, b) => {
     const keyA = a[sortBy.value];
     const keyB = b[sortBy.value];
@@ -582,7 +593,7 @@ const sortedTasks = computed(() => {
 
 // Filtragem das tarefas com base nos filtros selecionados
 const filteredTasks = computed(() => {
-  if (!tasks.value) {
+  if (!props.tasks) {
     return []; // ou alguma ação padrão
   }
 
@@ -652,10 +663,12 @@ const handleExportCSV = () => {
 };
 
 const currentPage = computed({
-  get: () => pagination.value.current_page,
+  get: () => props.pagination.current_page,
   set: (value) => emit('update:page', value),
 });
-const totalPages = computed(() => Math.ceil(tasksStore.pagination.total / tasksStore.pagination.per_page));
+const totalPages = computed(() => 
+  Math.ceil(props.pagination.total / props.pagination.per_page)
+);
 
 const handlePageChange = (page) => {
   currentPage.value = page;
