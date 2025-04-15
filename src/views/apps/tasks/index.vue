@@ -292,6 +292,18 @@ const applyDateFilter = async () => {
     }
   );
 };
+
+const showAddDialog = ref(false);
+
+const handleAddSuccess = async () => {
+  showAddDialog.value = false;
+  await tasksStore.getTasks(
+    search.value,
+    selectedSegment.value,
+    pagination.value.current_page,
+    filters.value
+  );
+};
 </script>
 
 <template>
@@ -310,9 +322,22 @@ const applyDateFilter = async () => {
           ></v-text-field>
         </v-col>
         <v-col cols="12" lg="2" md="2" class="text-right">
-          <v-btn flat color="primary" to="/apps/tasks/add">
-            Novo Chamado
-          </v-btn>
+          <v-dialog v-model="showAddDialog" width="800" persistent>
+            <template v-slot:activator="{ props }">
+              <v-btn flat color="primary" v-bind="props">
+                Novo Chamado
+              </v-btn>
+            </template>
+            <v-card width="800">
+              <v-card-title>Adicionar chamado</v-card-title>
+              <v-card-text>
+                <TaskAddForm
+                  @add="handleAddSuccess"
+                  @cancel="showAddDialog = false"
+                />
+              </v-card-text>
+            </v-card>
+          </v-dialog>
         </v-col>
       </v-row>
 

@@ -1,6 +1,10 @@
 <template> 
   <div>
-    <v-alert v-if="feedbackMessage" color="error" class="mb-2">
+    <v-alert
+      v-if="feedbackMessage"
+      :color="feedbackMessage.includes('Erro') ? 'error' : 'success'"
+      class="mb-2"
+    >
       {{ feedbackMessage }}
     </v-alert>
 
@@ -127,7 +131,12 @@
         <!-- Botões de ação -->
         <v-row justify="end">
           <v-col cols="12" md="auto">
-            <v-btn flat text="Cancelar" @click="emit('cancel')" />
+            <v-btn 
+              flat 
+              text="Cancelar" 
+              @click="emit('cancel')"
+              :disabled="isSubmitting"
+            />
           </v-col>
           <v-col cols="12" md="auto">
             <v-btn
@@ -247,16 +256,15 @@ const submit = handleSubmit(async (values) => {
   values.priority_id = priority_id.value;
   values.segment = segment.value;
   try {
-    // Primeiro, cria a interação
     const files = selectedFiles.value;
     const taskPayload = await tasksStore.storeTask(values, files);
-    
-  // const files = selectedFiles.value; // Assumindo que `selectedFiles` contém os arquivos selecionados pelo usuário
-
-  // await tasksStore.storeTask(taskPayload, files);
-  emit("add");
-} catch (error) {
+    if (taskPayload) {
+      feedbackMessage.value = 'Chamado criado com sucesso!';
+      emit("add");
+    }
+  } catch (error) {
     console.error('Erro ao adicionar comentário ou fazer upload dos arquivos:', error);
+    feedbackMessage.value = 'Erro ao criar o chamado. Por favor, tente novamente.';
   }
 });
 
