@@ -278,7 +278,9 @@ const applyDateFilter = async () => {
 
 <template>
   <v-card class="pa-4">
+    <!-- Cabeçalho com filtros -->
     <div class="d-flex justify-space-between align-center mb-4">
+      <!-- Lado esquerdo: Pesquisa e Segmentos -->
       <div class="d-flex align-center">
         <div class="me-4">
           <v-text-field
@@ -300,8 +302,8 @@ const applyDateFilter = async () => {
         </div>
       </div>
 
+      <!-- Lado direito: Paginação, Filtros de Data e Botões -->
       <div class="d-flex align-center">
-        <!-- Quantidade de registros por página -->
         <v-select
           v-model="perPage"
           :items="paginationOptions"
@@ -316,7 +318,6 @@ const applyDateFilter = async () => {
           @update:model-value="handlePerPageChange"
         ></v-select>
 
-        <!-- Filtro por data -->
         <div class="d-flex align-center me-4">
           <v-select
             v-model="selectedMonth"
@@ -354,7 +355,6 @@ const applyDateFilter = async () => {
           </v-btn>
         </div>
 
-        <!-- Toggle para mostrar todos os chamados -->
         <v-switch
           v-model="showAllTasks"
           label="Mostrar Todos Chamados"
@@ -375,6 +375,7 @@ const applyDateFilter = async () => {
       </div>
     </div>
 
+    <!-- Tabela de Tasks -->
     <TasksTable
       :tasks="tasks"
       :pagination="pagination"
