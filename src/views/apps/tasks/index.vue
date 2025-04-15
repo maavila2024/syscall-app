@@ -470,6 +470,9 @@ const handleEditSuccess = async () => {
         :pagination="pagination"
         @openChat="openChatModal"
         @openAttachments="openAttachmentsModal"
+        @show="(task) => { toShow.value = task; showViewDialog.value = true }"
+        @edit="(task) => { toEdit.value = task; showEditDialog.value = true }"
+        @delete="(task) => { toDelete.value = task; showDeleteDialog.value = true }"
         @update:filters="applyFilters"
         @update:page="handlePageChange"
       />

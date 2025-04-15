@@ -289,34 +289,34 @@
               <div class="d-flex align-center">
                 <v-tooltip text="Visualizar Chamado">
                   <template v-slot:activator="{ props }">
-                    <v-btn icon flat @click="toShow = task" v-bind="props">
-                      <EyeIcon
-                        stroke-width="1.5"
-                        size="20"
-                        class="text-primary"
-                      />
+                    <v-btn
+                      icon
+                      size="small"
+                      @click="handleShowTask(task)"
+                    >
+                      <EyeIcon />
                     </v-btn>
                   </template>
                 </v-tooltip>
                 <v-tooltip v-if="isAdmin" text="Editar Chamado">
                   <template v-slot:activator="{ props }">
-                    <v-btn icon flat @click="toEdit = task" v-bind="props">
-                      <PencilIcon
-                        stroke-width="1.5"
-                        size="20"
-                        class="text-primary"
-                      />
+                    <v-btn
+                      icon
+                      size="small"
+                      @click="handleEditTask(task)"
+                    >
+                      <PencilIcon />
                     </v-btn>
                   </template>
                 </v-tooltip>
                 <v-tooltip v-if="isAdmin" text="Deletar Chamado">
                   <template v-slot:activator="{ props }">
-                    <v-btn icon flat @click="toDelete = task" v-bind="props">
-                      <TrashIcon
-                        stroke-width="1.5"
-                        size="20"
-                        class="text-error"
-                      />
+                    <v-btn
+                      icon
+                      size="small"
+                      @click="handleDeleteTask(task)"
+                    >
+                      <TrashIcon />
                     </v-btn>
                   </template>
                 </v-tooltip>
@@ -443,7 +443,7 @@ const isAdmin = computed(() =>
   Array.isArray(meStore.user?.teams) &&
   meStore.user.teams.some(team => team.is_admin) || false
 );
-const emit = defineEmits(["update:filters", "update:page"]);
+const emit = defineEmits(['update:filters', 'update:page', 'openChat', 'openAttachments']);
 
 // Filtros para cada coluna
 const selectedStatuses = ref([]);
@@ -673,6 +673,21 @@ const totalPages = computed(() =>
 const handlePageChange = (page) => {
   currentPage.value = page;
   emit('update:page', page);
+};
+
+const handleShowTask = (task) => {
+  tasksStore.toShow = task;
+  emit('show', task);
+};
+
+const handleEditTask = (task) => {
+  tasksStore.toEdit = task;
+  emit('edit', task);
+};
+
+const handleDeleteTask = (task) => {
+  tasksStore.toDelete = task;
+  emit('delete', task);
 };
 </script>
 
