@@ -76,7 +76,6 @@
                 density="compact"
                 style="min-width: 100px; max-width: 120px"
                 variant="outlined"
-                @update:model-value="handlePerPageChange"
               ></v-select>
             </div>
 
@@ -515,7 +514,19 @@ const paginationOptions = [
   { title: '15 registros', value: 15 }
 ];
 
-const perPage = ref(meStore.user?.default_pagination || 5);
+const perPage = computed({
+  get: () => meStore.user?.default_pagination || 5,
+  set: async (value) => {
+    await meStore.updateUserPreference({ default_pagination: value });
+    await tasksStore.getTasks(search.value, selectedSegment.value, 1, {
+      ...filters.value,
+      per_page: value,
+    });
+  },
+});
+
+
+// const perPage = ref(meStore.user?.default_pagination || 5);
 
 // Função para atualizar a preferência do usuário
 const handlePerPageChange = async (value) => {

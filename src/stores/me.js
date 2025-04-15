@@ -78,7 +78,13 @@ export const useMeStore = defineStore('me', {
     async updateUserPreference(preference) {
       try {
         const response = await axios.patch('/api/me/preferences', preference);
-        this.user = response.data;
+
+        // Atualiza apenas a preferência alterada no user
+        this.user = {
+          ...this.user,
+          ...preference,
+        };
+
         return response.data;
       } catch (error) {
         console.error('Error updating user preference:', error);
