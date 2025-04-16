@@ -256,7 +256,7 @@ import { ref, computed, watch, nextTick } from "vue";
 import { useTasksStore } from "@/stores/apps/tasks";
 import { format } from 'date-fns';
 
-const emit = defineEmits(["cancel", "edit"]);
+const emit = defineEmits(['cancel', 'edit']);
 const props = defineProps({
   task: {
     type: Object,

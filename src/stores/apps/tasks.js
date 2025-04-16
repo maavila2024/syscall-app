@@ -27,13 +27,13 @@ export const useTasksStore = defineStore('tasks', {
   }),
 
   actions: {
-    async getTasks(search = '', segment = '0', page = 1, filters = {}) {
+    async getTasks(search = '', segment = '', page = 1, filters = {}) {
       try {
         const params = {
           search,
           segment,
           page,
-          per_page: 5,
+          per_page: filters.per_page || 15,
           show_all: filters.show_all || false,
           sort_by: filters.sortBy || 'created_at',
           sort_order: filters.sortOrder || 'desc',
@@ -42,18 +42,14 @@ export const useTasksStore = defineStore('tasks', {
 
         console.log('Requesting tasks with params:', params);
 
-        const response = await axios.get('api/tasks', { params });
-        
-        // Limpa o array atual
+        const response = await axios.get('/api/tasks', { params });
+
         this.tasks = [];
-        
-        // Força atualização do Vue com os novos dados
         await nextTick();
-        
-        // Atualiza com os novos dados
         this.tasks = response.data.data;
-        
-        this.pagination = {
+
+        // Compatibiliza estrutura da API
+        this.pagination = response.data.meta || {
           current_page: response.data.current_page,
           last_page: response.data.last_page,
           per_page: response.data.per_page,
@@ -105,10 +101,9 @@ export const useTasksStore = defineStore('tasks', {
     async storeTask(payload, files) {
       try {
         const response = await axios.post('api/tasks', payload);
-        // this.tasks.push(task);
         const task = response.data;
         await this.getTasks();
-        // Se houver arquivos, faz o upload de cada um associado à task criada
+
         if (files && files.length > 0) {
           const formData = new FormData();
           formData.append('task_id', task.id);
@@ -126,7 +121,6 @@ export const useTasksStore = defineStore('tasks', {
     },
 
     async updateTask(taskId, payload) {
-      
       try {
         const response = await axios.put(`api/tasks/${taskId}`, payload);
         const task = response.data.data;
@@ -162,7 +156,6 @@ export const useTasksStore = defineStore('tasks', {
       }
     },
 
-    // Adicionando a função getTaskFiles   
     async getTaskFiles(taskId) {
       try {
         const response = await axios.get(`api/task-file/${taskId}`);
@@ -172,7 +165,6 @@ export const useTasksStore = defineStore('tasks', {
       }
     },
 
-    // Adicionando a função deleteTaskFile
     async deleteTaskFile(fileId) {
       try {
         await axios.delete(`api/task-file/${fileId}`);
@@ -196,7 +188,6 @@ export const useTasksStore = defineStore('tasks', {
 
     async fetchTaskStatisticsBySegment(segment, date) {
       try {
-        // Supondo que a API backend aceita uma data no formato "YYYY-MM"
         const response = await axios.get('api/tasks/chart-statistics', {
           params: { segment, date }
         });
@@ -205,6 +196,6 @@ export const useTasksStore = defineStore('tasks', {
         console.error('Error fetching task statistics:', error);
         throw error;
       }
-    }    
+    }
   },
 });
