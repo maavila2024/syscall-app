@@ -583,12 +583,25 @@ const sortedTasks = computed(() => {
 
 // Filtragem das tarefas com base nos filtros selecionados
 const filteredTasks = computed(() => {
+  console.log('🔍 Filtrando tasks:', {
+    totalTasks: tasks.value?.length,
+    filters: {
+      status: selectedStatuses.value,
+      owners: selectedOwners.value,
+      responsibles: selectedResponsibles.value
+    }
+  });
+
   if (!tasks.value) {
-    return []; // ou alguma ação padrão
+    console.warn('⚠️ tasks.value está vazio');
+    return [];
   }
 
-  return sortedTasks.value.filter((task) => {
-    if (!task) return false;
+  return tasks.value.filter((task) => {
+    if (!task) {
+      console.warn('⚠️ Task inválida encontrada');
+      return false;
+    }
 
     const statusMatch =
       selectedStatuses.value.length === 0 ||

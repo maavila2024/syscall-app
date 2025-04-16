@@ -29,6 +29,7 @@ export const useTasksStore = defineStore('tasks', {
   actions: {
     async getTasks(search = '', segment = '0', page = 1, filters = {}) {
       try {
+        console.log('📡 Iniciando requisição getTasks:', { search, segment, page, filters });
         const params = {
           search,
           segment,
@@ -43,6 +44,7 @@ export const useTasksStore = defineStore('tasks', {
         console.log('Requesting tasks with params:', params);
 
         const response = await axios.get('api/tasks', { params });
+        console.log('✅ Resposta do backend:', response.data);
         
         // Limpa o array atual
         this.tasks = [];
@@ -52,6 +54,7 @@ export const useTasksStore = defineStore('tasks', {
         
         // Atualiza com os novos dados
         this.tasks = response.data.data;
+        console.log('📊 Tasks atualizadas:', this.tasks.length);
         
         this.pagination = {
           current_page: response.data.current_page,
@@ -59,10 +62,13 @@ export const useTasksStore = defineStore('tasks', {
           per_page: response.data.per_page,
           total: response.data.total,
         };
+        console.log('📄 Paginação atualizada:', this.pagination);
 
         return response.data;
       } catch (error) {
-        console.error('Error fetching tasks:', error);
+        console.error('❌ Erro em getTasks:', error);
+        console.error('Stack:', error.stack);
+        throw error; // Propaga o erro para ser tratado no componente
       }
     },
 

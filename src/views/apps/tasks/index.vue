@@ -350,14 +350,29 @@ watch(() => pagination.value.current_page, () => {
   fetchTasksDebounced();
 });
 
-onMounted(() => {
+onMounted(async () => {
+  console.log('🔥 Página de tarefas montada com sucesso');
+  console.log('📊 Estado inicial:', {
+    search: search.value,
+    segment: selectedSegment.value,
+    pagination: pagination.value,
+    filters: filters.value
+  });
+
   const query = route.query.search || "";
   if (query) {
     isSpecificSearch.value = true;
-    tasksStore.getTasks(query, selectedSegment.value, pagination.value.current_page, filters.value).then(() => {
+    try {
+      console.log('�� Buscando tasks com query:', query);
+      await tasksStore.getTasks(query, selectedSegment.value, pagination.value.current_page, filters.value);
+      console.log('✅ Tasks carregadas:', tasksStore.tasks);
+    } catch (error) {
+      console.error('❌ Erro ao carregar tasks:', error);
+    } finally {
       isSpecificSearch.value = false;
-    });
+    }
   } else {
+    console.log('🔄 Iniciando busca padrão');
     fetchTasksDebounced(pagination.value.current_page);
   }
 });
