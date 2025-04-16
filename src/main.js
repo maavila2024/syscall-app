@@ -72,3 +72,33 @@ meStore.getMe()
       .use(vuetify)
       .mount('#app');
   });
+
+app.config.errorHandler = (err, vm, info) => {
+  console.error("🔴 Erro capturado globalmente:", {
+    error: err,
+    component: vm?.$options?.name || 'Unknown',
+    info: info,
+    stack: err.stack
+  });
+};
+
+// Interceptor global para Axios
+axios.interceptors.response.use(
+  response => {
+    console.log('�� Resposta API:', {
+      url: response.config.url,
+      status: response.status,
+      data: response.data
+    });
+    return response;
+  },
+  error => {
+    console.error('🚫 Erro API:', {
+      url: error.config?.url,
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+    return Promise.reject(error);
+  }
+);

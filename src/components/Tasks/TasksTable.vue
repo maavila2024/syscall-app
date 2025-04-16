@@ -289,34 +289,34 @@
               <div class="d-flex align-center">
                 <v-tooltip text="Visualizar Chamado">
                   <template v-slot:activator="{ props }">
-                    <v-btn
-                      icon
-                      size="small"
-                      @click="handleShowTask(task)"
-                    >
-                      <EyeIcon />
+                    <v-btn icon flat @click="toShow = task" v-bind="props">
+                      <EyeIcon
+                        stroke-width="1.5"
+                        size="20"
+                        class="text-primary"
+                      />
                     </v-btn>
                   </template>
                 </v-tooltip>
                 <v-tooltip v-if="isAdmin" text="Editar Chamado">
                   <template v-slot:activator="{ props }">
-                    <v-btn
-                      icon
-                      size="small"
-                      @click="handleEditTask(task)"
-                    >
-                      <PencilIcon />
+                    <v-btn icon flat @click="toEdit = task" v-bind="props">
+                      <PencilIcon
+                        stroke-width="1.5"
+                        size="20"
+                        class="text-primary"
+                      />
                     </v-btn>
                   </template>
                 </v-tooltip>
                 <v-tooltip v-if="isAdmin" text="Deletar Chamado">
                   <template v-slot:activator="{ props }">
-                    <v-btn
-                      icon
-                      size="small"
-                      @click="handleDeleteTask(task)"
-                    >
-                      <TrashIcon />
+                    <v-btn icon flat @click="toDelete = task" v-bind="props">
+                      <TrashIcon
+                        stroke-width="1.5"
+                        size="20"
+                        class="text-error"
+                      />
                     </v-btn>
                   </template>
                 </v-tooltip>
@@ -425,29 +425,15 @@ import { useRoute, useRouter } from "vue-router";
 import { exportToCSV } from "@/utils/exportToCSV";
 import { formatDateToBR } from '@/utils/helpers.js';
 
-// Definindo props
-const props = defineProps({
-  tasks: {
-    type: Array,
-    default: () => [],
-  },
-  pagination: {
-    type: Object,
-    required: true
-  }
-});
-
 const meStore = useMeStore();
 const tasksStore = useTasksStore();
 const route = useRoute();
 const router = useRouter();
-
 const { tasks, toShow, toEdit, toDelete, taskFiles, pagination } = storeToRefs(tasksStore);
 const isAdmin = computed(() => 
   meStore.user?.teams?.some((team) => team.is_admin) || false
-
 );
-const emit = defineEmits(['update:filters', 'update:page', 'openChat', 'openAttachments']);
+const emit = defineEmits(["update:filters", "update:page"]);
 
 // Filtros para cada coluna
 const selectedStatuses = ref([]);
@@ -465,23 +451,23 @@ const showComplexityFilter = ref(false);
 
 // Opções de filtros únicas
 const statusOptions = computed(() => [
-  ...new Set(props.tasks.map((task) => task.task_status?.name)),
+  ...new Set(tasks.value.map((task) => task.task_status.name)),
 ]);
 const ownerOptions = computed(() => [
-  ...new Set(props.tasks.map((task) => task.user_owner?.first_name)),
+  ...new Set(tasks.value.map((task) => task.user_owner.first_name)),
 ]);
 const responsibleOptions = computed(() => [
   ...new Set(
-    props.tasks.map(
+    tasks.value.map(
       (task) => task.user_responsible?.first_name || "Nenhum responsável"
     )
   ),
 ]);
 const priorityOptions = computed(() => [
-  ...new Set(props.tasks.map((task) => task.priority.name)),
+  ...new Set(tasks.value.map((task) => task.priority.name)),
 ]);
 const complexityOptions = computed(() => [
-  ...new Set(props.tasks.map((task) => task.complexity?.name || "Em análise")),
+  ...new Set(tasks.value.map((task) => task.complexity?.name || "Em análise")),
 ]);
 
 // Estado do checkbox "Selecionar todos"
@@ -584,7 +570,7 @@ const sortTable = (key) => {
 };
 
 const sortedTasks = computed(() => {
-  const sorted = [...props.tasks];
+  const sorted = [...tasks.value];
   sorted.sort((a, b) => {
     const keyA = a[sortBy.value];
     const keyB = b[sortBy.value];
@@ -597,12 +583,25 @@ const sortedTasks = computed(() => {
 
 // Filtragem das tarefas com base nos filtros selecionados
 const filteredTasks = computed(() => {
-  if (!props.tasks) {
-    return []; // ou alguma ação padrão
+  console.log('🔍 Filtrando tasks:', {
+    totalTasks: tasks.value?.length,
+    filters: {
+      status: selectedStatuses.value,
+      owners: selectedOwners.value,
+      responsibles: selectedResponsibles.value
+    }
+  });
+
+  if (!tasks.value) {
+    console.warn('⚠️ tasks.value está vazio');
+    return [];
   }
 
-  return sortedTasks.value.filter((task) => {
-    if (!task) return false;
+  return tasks.value.filter((task) => {
+    if (!task) {
+      console.warn('⚠️ Task inválida encontrada');
+      return false;
+    }
 
     const statusMatch =
       selectedStatuses.value.length === 0 ||
@@ -681,12 +680,10 @@ const handleExportCSV = () => {
 const currentPage = ref(1);
 const totalPages = computed(() => Math.ceil(pagination.value.total / pagination.value.per_page));
 
-
 const handlePageChange = (page) => {
   currentPage.value = page;
   emit('update:page', page);
 };
-
 
 // Observar mudanças nas tasks
 watch(() => tasks.value, (newTasks) => {
@@ -697,22 +694,6 @@ watch(() => tasks.value, (newTasks) => {
 watch(() => pagination.value.per_page, () => {
   currentPage.value = 1;
 });
-
-const handleShowTask = (task) => {
-  tasksStore.toShow = task;
-  emit('show', task);
-};
-
-const handleEditTask = (task) => {
-  tasksStore.toEdit = task;
-  emit('edit', task);
-};
-
-const handleDeleteTask = (task) => {
-  tasksStore.toDelete = task;
-  emit('delete', task);
-};
-
 </script>
 
 <style scoped>
