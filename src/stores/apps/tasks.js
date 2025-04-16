@@ -40,7 +40,7 @@ export const useTasksStore = defineStore('tasks', {
           sort_order: filters.sortOrder || 'desc',
           ...filters
         };
-
+     
         console.log('Requesting tasks with params:', params);
 
         const response = await axios.get('api/tasks', { params });

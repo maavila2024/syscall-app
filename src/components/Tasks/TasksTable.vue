@@ -643,7 +643,7 @@ const filteredTasks = computed(() => {
 watch(filteredTasks, (val) => {
   console.log('⚠️ filteredTasks atualizadas:', val);
 });
-
+    
 
 const getStatusStyle = (taskStatus) => {
   if (!taskStatus) return {}; // evita erro se undefined
