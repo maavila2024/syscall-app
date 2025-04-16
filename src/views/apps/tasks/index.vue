@@ -399,7 +399,7 @@ const months = [
   { title: 'Novembro', value: 11 },
   { title: 'Dezembro', value: 12 }
 ];
-    
+        
 const years = [2024, 2025].map(y => ({ title: y.toString(), value: y }));
 const selectedMonth = ref(null);
 const selectedYear = ref(new Date().getFullYear());

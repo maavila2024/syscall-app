@@ -45,7 +45,7 @@ window.Echo = new Echo({
     };
   }
 });
-    
+         
 const i18n = createI18n({
   locale: 'en',
   silentTranslationWarn: true,
