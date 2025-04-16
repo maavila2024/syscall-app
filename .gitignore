@@ -1,4 +1,9 @@
-# ... outras entradas ...
+# Node/Vite/Vue
+node_modules/
+dist/
 .history/
-.history/*
-*/.history/* 
+
+# Ambiente
+.env
+.env.*
+vite.config.js

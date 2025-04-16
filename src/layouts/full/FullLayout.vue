@@ -5,11 +5,22 @@ import VerticalHeaderVue from './vertical-header/VerticalHeader.vue';
 import Customizer from './customizer/Customizer.vue';
 import { useCustomizerStore } from '@/stores/customizer';
 import { useMeStore } from '@/stores/me';
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 
 const customizer = useCustomizerStore();
 const meStore = useMeStore();
-const isAdmin = computed(() => meStore.user.teams.some(team => team.is_admin));
+const isAdmin = computed(() => {
+  if (!meStore.user || !meStore.user.teams) return false;
+  return meStore.user.teams.some(team => team.is_admin);
+});
+
+// Adicionar um watch para garantir que os menus sejam atualizados quando o usuário for carregado
+watch(() => meStore.user, (newUser) => {
+  if (newUser) {
+    // Força reavaliação do computed
+    isAdmin.value;
+  }
+}, { immediate: true });
 </script>
 
 <template>

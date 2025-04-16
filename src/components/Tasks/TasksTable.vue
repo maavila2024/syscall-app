@@ -392,7 +392,9 @@
 
     <div class="d-flex justify-space-between align-center mt-4">
       <span class="text-caption">
-        Mostrando {{ pagination.per_page }} de {{ pagination.total }} registros
+        Mostrando {{ (pagination.current_page - 1) * pagination.per_page + 1 }} 
+        até {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }}
+        de {{ pagination.total }} registros
       </span>
       
       <v-pagination
@@ -439,9 +441,11 @@ const meStore = useMeStore();
 const tasksStore = useTasksStore();
 const route = useRoute();
 const router = useRouter();
-const isAdmin = computed(() =>
-  Array.isArray(meStore.user?.teams) &&
-  meStore.user.teams.some(team => team.is_admin) || false
+
+const { tasks, toShow, toEdit, toDelete, taskFiles, pagination } = storeToRefs(tasksStore);
+const isAdmin = computed(() => 
+  meStore.user?.teams?.some((team) => team.is_admin) || false
+
 );
 const emit = defineEmits(['update:filters', 'update:page', 'openChat', 'openAttachments']);
 
@@ -621,7 +625,10 @@ const filteredTasks = computed(() => {
       );
     const segmentMatch =
       meStore.user?.default_segment == 0 ||
-      task.segment == meStore.user?.default_segment;
+      String(task.segment) === String(meStore.user?.default_segment) ||
+      task.segment == null;
+
+
 
     return (
       statusMatch &&
@@ -633,6 +640,11 @@ const filteredTasks = computed(() => {
     );
   });
 });
+
+watch(filteredTasks, (val) => {
+  console.log('⚠️ filteredTasks atualizadas:', val);
+});
+
 
 const getStatusStyle = (taskStatus) => {
   if (!taskStatus) return {}; // evita erro se undefined
@@ -658,22 +670,33 @@ watch(
   }
 );
 
+watch(() => pagination.per_page, () => {
+  currentPage.value = 1;
+});
+
 const handleExportCSV = () => {
   exportToCSV(filteredTasks.value, "tasks.csv");
 };
 
-const currentPage = computed({
-  get: () => props.pagination.current_page,
-  set: (value) => emit('update:page', value),
-});
-const totalPages = computed(() => 
-  Math.ceil(props.pagination.total / props.pagination.per_page)
-);
+const currentPage = ref(1);
+const totalPages = computed(() => Math.ceil(pagination.value.total / pagination.value.per_page));
+
 
 const handlePageChange = (page) => {
   currentPage.value = page;
   emit('update:page', page);
 };
+
+
+// Observar mudanças nas tasks
+watch(() => tasks.value, (newTasks) => {
+  console.log('Tasks atualizadas:', newTasks);
+}, { deep: true });
+
+// Observar mudanças na paginação
+watch(() => pagination.value.per_page, () => {
+  currentPage.value = 1;
+});
 
 const handleShowTask = (task) => {
   tasksStore.toShow = task;
@@ -689,6 +712,7 @@ const handleDeleteTask = (task) => {
   tasksStore.toDelete = task;
   emit('delete', task);
 };
+
 </script>
 
 <style scoped>
