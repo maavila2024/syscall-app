@@ -99,19 +99,6 @@
               </v-btn>
             </div>
           </div>
-
-          <div class="ml-auto">
-            <v-select
-              v-model="perPage"
-              :items="paginationOptions"
-              label="Registros por página"
-              hide-details
-              density="compact"
-              style="min-width: 140px; max-width: 140px"
-              variant="outlined"
-              @update:model-value="handlePerPageChange"
-            ></v-select>
-          </div>
         </v-col>
       </v-row>
     </div>
@@ -220,7 +207,7 @@
   </div>
 </template>
 
-<script setup>  
+<script setup>
 import { computed, ref, watch, onMounted, nextTick } from "vue";
 import { TrashIcon } from "vue-tabler-icons";
 import { useAsyncState } from "@vueuse/core";
@@ -254,157 +241,93 @@ const { users } = useAsyncState(tasksStore.getUsers());
 const selectedFilters = ref({});
 
 const isEditing = computed({
-  get() {
-    return !!Object.keys(toEdit.value).length;
-  },
-  set(value) {
-    if (!value) {
-      toEdit.value = {};
-    }
-  },
+  get: () => !!Object.keys(toEdit.value).length,
+  set: (value) => { if (!value) toEdit.value = {}; }
 });
 
 const isShowing = computed({
-  get() {
-    return !!Object.keys(toShow.value).length;
-  },
-  set(value) {
-    if (!value) {
-      toShow.value = {};
-    }
-  },
+  get: () => !!Object.keys(toShow.value).length,
+  set: (value) => { if (!value) toShow.value = {}; }
 });
 
 const isDeleting = computed({
-  get() {
-    return !!Object.keys(toDelete.value).length;
-  },
-  set(value) {
-    if (!value) {
-      toDelete.value = {};
-    }
-  },
+  get: () => !!Object.keys(toDelete.value).length,
+  set: (value) => { if (!value) toDelete.value = {}; }
 });
 
 const deleting = ref(false);
-async function deleteTask(task) {
+const deleteTask = async (task) => {
   deleting.value = true;
   await tasksStore.deleteTask(task.id);
   toDelete.value = {};
   deleting.value = false;
-}
+};
 
-function onPageChange(page) {
-  console.log("Page selected:", page);  
-  fetchTasksDebounced(); // Chama a função para buscar as tarefas
-}
-
+const selectedTaskId = ref(0);
 const showChatModal = ref(false);
-const selectedTaskId = ref(0); // Inicialize com um valor numérico
 const showAddNoteModal = ref(false);
 const newNote = ref("");
 const loggedInUserId = ref(meStore.user.id);
-
-const openChatModal = (task) => {
-  if (task && task.id) {
-    selectedTaskId.value = task.id;
-    showChatModal.value = true;
-  }
-};
-
-const openAddNoteModal = (task) => {
-  if (task && task.id) {
-    selectedTaskId.value = task.id;
-    showAddNoteModal.value = true;
-  }
-};
-
+const openChatModal = (task) => { if (task?.id) { selectedTaskId.value = task.id; showChatModal.value = true; } };
+const openAddNoteModal = (task) => { if (task?.id) { selectedTaskId.value = task.id; showAddNoteModal.value = true; } };
 const addNote = async () => {
-  await chatStore.addMessage(
-    selectedTaskId.value,
-    newNote.value,
-    loggedInUserId.value
-  );
+  await chatStore.addMessage(selectedTaskId.value, newNote.value, loggedInUserId.value);
   newNote.value = "";
   showAddNoteModal.value = false;
 };
 
 const showAttachmentsModal = ref(false);
-
-const openAttachmentsModal = (task) => {
-  if (task && task.id) {
-    selectedTaskId.value = task.id;
-    showAttachmentsModal.value = true;
-  }
-};
+const openAttachmentsModal = (task) => { if (task?.id) { selectedTaskId.value = task.id; showAttachmentsModal.value = true; } };
 
 const search = ref("");
 const isSpecificSearch = ref(false);
 const selectedSegment = ref(meStore.user?.default_segment || "0");
-
-const selectedPriorities = ref(null);
-const selectedComplexities = ref(null);
-const selectedStatuses = ref(null);
-const selectedResponsibles = ref(null);
-const selectedOwners = ref(null);
+const selectedPriorities = ref([]);
+const selectedComplexities = ref([]);
+const selectedStatuses = ref([]);
+const selectedResponsibles = ref([]);
+const selectedOwners = ref([]);
 
 const filters = computed(() => ({
-  priority: selectedPriorities.value || null,
-  complexity: selectedComplexities.value || null,
-  taskStatus: selectedStatuses.value || null,
-  userResponsible: selectedResponsibles.value || null,
-  userOwner: selectedOwners.value || null,
+  priority: selectedPriorities.value,
+  complexity: selectedComplexities.value,
+  taskStatus: selectedStatuses.value,
+  userResponsible: selectedResponsibles.value,
+  userOwner: selectedOwners.value
 }));
 
 const showAllTasks = ref(false);
-
 const applyFilters = (newFilters) => {
-  console.log("Filters received:", newFilters); 
-  selectedPriorities.value = newFilters.priority || null;
-  selectedComplexities.value = newFilters.complexity || null;
-  selectedStatuses.value = newFilters.taskStatus || null;
-  selectedResponsibles.value = newFilters.userResponsible || null;
-  selectedOwners.value = newFilters.userOwner || null;
-
-  console.log("Updated Filters:", filters.value); // Log dos filtros atualizados
+  selectedPriorities.value = newFilters.priority || [];
+  selectedComplexities.value = newFilters.complexity || [];
+  selectedStatuses.value = newFilters.taskStatus || [];
+  selectedResponsibles.value = newFilters.userResponsible || [];
+  selectedOwners.value = newFilters.userOwner || [];
   fetchTasksDebounced(pagination.value.current_page);
 };
 
-function debounce(fn, delay) {
+const debounce = (fn, delay) => {
   let timeoutID;
-  return function (...args) {
+  return (...args) => {
     clearTimeout(timeoutID);
     timeoutID = setTimeout(() => fn(...args), delay);
   };
-}
+};
 
 const updateUserSegment = async () => {
   try {
     await meStore.updateUserSegment(selectedSegment.value);
     fetchTasksDebounced(pagination.value.current_page);
   } catch (error) {
-    console.error("Failed to update user segment:", error);
+    console.error("Erro ao atualizar segmento:", error);
   }
 };
 
 const handleShowAllChange = async (value) => {
   try {
     isLoading.value = true;
-
-    // Força atualização da página atual no store
     pagination.value.current_page = 1;
-
-    await tasksStore.getTasks(
-      search.value,
-      selectedSegment.value,
-      1, // Reinicia da primeira página
-      {
-        ...filters.value,
-        show_all: value
-      }
-    );
-
-    // Força atualização da tabela
+    await tasksStore.getTasks(search.value, selectedSegment.value, 1, { ...filters.value, show_all: value });
     await fetchTasksDebounced();
   } finally {
     isLoading.value = false;
@@ -413,27 +336,15 @@ const handleShowAllChange = async (value) => {
 
 const fetchTasksDebounced = debounce(async () => {
   const page = pagination.value.current_page;
-  const query = search.value || "";
-  
-  await tasksStore.getTasks(
-    query, 
-    selectedSegment.value, 
-    page, 
-    {
-      ...filters.value,
-      show_all: showAllTasks.value
-    }
-  );
+  await tasksStore.getTasks(search.value, selectedSegment.value, page, {
+    ...filters.value,
+    show_all: showAllTasks.value,
+  });
 }, 2000);
 
-watch(
-  [search, selectedSegment, filters],
-  () => {
-    console.log("Filters or page changed, fetching tasks...");
-    fetchTasksDebounced(pagination.value.current_page);
-  },
-  { deep: true }
-);
+watch([search, selectedSegment, filters], () => {
+  fetchTasksDebounced(pagination.value.current_page);
+}, { deep: true });
 
 watch(() => pagination.value.current_page, () => {
   fetchTasksDebounced();
@@ -451,20 +362,14 @@ onMounted(() => {
   }
 });
 
-watch(search, (newSearch) => {
-  tasksStore.getTasks(newSearch);
-});
-
 const handlePageChange = async (page) => {
-  await tasksStore.getTasks(
-    search.value, 
-    selectedSegment.value, 
-    page, 
-    filters.value
-  );
+  pagination.value.current_page = page;
+  await tasksStore.getTasks(search.value, selectedSegment.value, page, {
+    ...filters.value,
+    show_all: showAllTasks.value
+  });
 };
 
-// Array de meses
 const months = [
   { title: 'Janeiro', value: 1 },
   { title: 'Fevereiro', value: 2 },
@@ -480,73 +385,21 @@ const months = [
   { title: 'Dezembro', value: 12 }
 ];
 
-// Array de anos (dinâmico)
-const years = [2024, 2025].map(year => ({ title: year.toString(), value: year }));
-
+const years = [2024, 2025].map(y => ({ title: y.toString(), value: y }));
 const selectedMonth = ref(null);
 const selectedYear = ref(new Date().getFullYear());
 
 const applyDateFilter = async () => {
   if (!selectedMonth.value || !selectedYear.value) return;
-
-  await tasksStore.getTasks(
-    search.value,
-    selectedSegment.value,
-    pagination.value.current_page,
-    {
-      ...filters.value,
-      show_all: true, // Sempre mostra todos quando filtrando por data
-      filter_month: selectedMonth.value,
-      filter_year: selectedYear.value
-    }
-  );
+  await tasksStore.getTasks(search.value, selectedSegment.value, pagination.value.current_page, {
+    ...filters.value,
+    show_all: true,
+    filter_month: selectedMonth.value,
+    filter_year: selectedYear.value
+  });
 };
-
-// Opções de paginação
-const paginationOptions = [
-  { title: '5 registros', value: 5 },
-  { title: '10 registros', value: 10 },
-  { title: '15 registros', value: 15 }
-];
-
-const perPage = ref(meStore.user?.default_pagination || 5);
-
-const handlePerPageChange = async (value) => {
-  try {
-    // Atualiza no backend
-    await meStore.updateUserPreference({ default_pagination: value });
-
-    // Atualiza localmente
-    perPage.value = value;
-
-    // Atualiza a paginação no store (reseta para página 1)
-    pagination.value.current_page = 1;
-
-    // Limpa filtros locais para evitar inconsistência
-    selectedStatuses.value = [];
-    selectedOwners.value = [];
-    selectedResponsibles.value = [];
-    selectedPriorities.value = [];
-    selectedComplexities.value = [];
-
-    // Busca os dados novamente com a nova configuração
-    await tasksStore.getTasks(
-      search.value,
-      selectedSegment.value,
-      1,
-      {
-        show_all: showAllTasks.value,
-        filter_month: selectedMonth.value,
-        filter_year: selectedYear.value,
-        per_page: value
-      }
-    );
-  } catch (error) {
-    console.error('Erro ao atualizar paginação:', error);
-  }
-};
-
 </script>
+
 <style scoped>
 .d-flex {
   display: flex;

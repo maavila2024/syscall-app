@@ -1,4 +1,9 @@
-.history/
-.env
-dist/
+# Node/Vite/Vue
 node_modules/
+dist/
+.history/
+
+# Ambiente
+.env
+.env.*
+vite.config.js

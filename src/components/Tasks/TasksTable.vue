@@ -392,7 +392,9 @@
 
     <div class="d-flex justify-space-between align-center mt-4">
       <span class="text-caption">
-        Mostrando {{ pagination.per_page }} de {{ pagination.total }} registros
+        Mostrando {{ (pagination.current_page - 1) * pagination.per_page + 1 }} 
+        até {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }}
+        de {{ pagination.total }} registros
       </span>
       
       <v-pagination
@@ -631,9 +633,9 @@ watch(filteredTasks, (val) => {
 
 
 const getStatusStyle = (taskStatus) => {
+  if (!taskStatus) return {}; // evita erro se undefined
   return {
     color: taskStatus.color,
-    // backgroundColor: taskStatus.bg_color,
   };
 };
 
@@ -663,12 +665,22 @@ const handleExportCSV = () => {
 };
 
 const currentPage = ref(1);
-const totalPages = computed(() => Math.ceil(tasksStore.pagination.total / tasksStore.pagination.per_page));
+const totalPages = computed(() => Math.ceil(pagination.value.total / pagination.value.per_page));
 
 const handlePageChange = (page) => {
   currentPage.value = page;
   emit('update:page', page);
 };
+
+// Observar mudanças nas tasks
+watch(() => tasks.value, (newTasks) => {
+  console.log('Tasks atualizadas:', newTasks);
+}, { deep: true });
+
+// Observar mudanças na paginação
+watch(() => pagination.value.per_page, () => {
+  currentPage.value = 1;
+});
 </script>
 
 <style scoped>

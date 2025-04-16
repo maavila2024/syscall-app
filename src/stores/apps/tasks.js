@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 import { useMeStore } from '@/stores/me';
+import { nextTick } from 'vue';
 
 export const useTasksStore = defineStore('tasks', {
   state: () => ({
@@ -28,14 +29,11 @@ export const useTasksStore = defineStore('tasks', {
   actions: {
     async getTasks(search = '', segment = '0', page = 1, filters = {}) {
       try {
-        const meStore = useMeStore();
-        const defaultPerPage = meStore.user?.default_pagination || 5;
-
         const params = {
           search,
           segment,
           page,
-          per_page: filters.per_page || defaultPerPage,
+          per_page: 5,
           show_all: filters.show_all || false,
           sort_by: filters.sortBy || 'created_at',
           sort_order: filters.sortOrder || 'desc',
@@ -43,16 +41,26 @@ export const useTasksStore = defineStore('tasks', {
         };
 
         console.log('Requesting tasks with params:', params);
-        console.log('Tasks recebidas:', this.tasks);
 
         const response = await axios.get('api/tasks', { params });
-        this.tasks.splice(0, this.tasks.length, ...response.data.data);
+        
+        // Limpa o array atual
+        this.tasks = [];
+        
+        // Força atualização do Vue com os novos dados
+        await nextTick();
+        
+        // Atualiza com os novos dados
+        this.tasks = response.data.data;
+        
         this.pagination = {
           current_page: response.data.current_page,
           last_page: response.data.last_page,
           per_page: response.data.per_page,
           total: response.data.total,
         };
+
+        return response.data;
       } catch (error) {
         console.error('Error fetching tasks:', error);
       }
