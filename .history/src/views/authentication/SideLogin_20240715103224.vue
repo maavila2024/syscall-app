@@ -16,7 +16,7 @@ import LoginForm from "@/components/auth/LoginForm.vue";
        
         <div>
           <img
-            src="@/assets/images/syscall/principal_syscall.jpg"
+            src="@/assets/images/syscall/principal_dcontrol.jpeg"
             class="position-relative d-none d-lg-flex"
             alt="login-background"
             style="width: 100%; height: 100%; object-fit: cover"

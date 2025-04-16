@@ -16,7 +16,7 @@ import RegisterForm from "@/components/auth/RegisterForm.vue";
       >
         <div>
           <img
-            src="@/assets/images/syscall/principal_syscall.jpg"
+            src="@/assets/images/syscall/principal_dcontrol.jpeg"
             class="position-relative d-none d-lg-flex"
             alt="login-background"
             style="width: 90%; height: auto; object-fit: contain"

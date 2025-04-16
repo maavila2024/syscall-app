@@ -83,32 +83,34 @@
                 :items="years"
                 label="Ano"
                 hide-details
-                class="mr-4"
+                class="mr-2"
                 density="compact"
                 style="min-width: 120px; max-width: 130px"
                 variant="outlined"
-              ></v-select>
-
-              <v-select
-                v-model="perPage"
-                :items="paginationOptions"
-                label="Registros por página"
-                hide-details
-                density="compact"
-                style="min-width: 100px; max-width: 120px"
-                variant="outlined"
-                class="mr-4"
-                @update:model-value="handlePerPageChange"
               ></v-select>
 
               <v-btn 
                 color="primary" 
                 @click="applyDateFilter"
                 :disabled="!selectedMonth || !selectedYear"
+                class="mr-4"
               >
                 Filtrar
               </v-btn>
             </div>
+          </div>
+
+          <div class="ml-auto">
+            <v-select
+              v-model="perPage"
+              :items="paginationOptions"
+              label="Registros por página"
+              hide-details
+              density="compact"
+              style="min-width: 140px; max-width: 140px"
+              variant="outlined"
+              @update:model-value="handlePerPageChange"
+            ></v-select>
           </div>
         </v-col>
       </v-row>
@@ -219,7 +221,7 @@
 </template>
 
 <script setup>  
-import { computed, ref, watch, onMounted } from "vue";
+import { computed, ref, watch, onMounted, nextTick } from "vue";
 import { TrashIcon } from "vue-tabler-icons";
 import { useAsyncState } from "@vueuse/core";
 import TasksTable from "@/components/Tasks/TasksTable.vue";
@@ -509,19 +511,33 @@ const paginationOptions = [
 
 const perPage = ref(meStore.user?.default_pagination || 5);
 
-// Função para atualizar a preferência do usuário
 const handlePerPageChange = async (value) => {
   try {
     // Atualiza no backend
     await meStore.updateUserPreference({ default_pagination: value });
-    
-    // Refaz a busca com nova paginação
+
+    // Atualiza localmente
+    perPage.value = value;
+
+    // Atualiza a paginação no store (reseta para página 1)
+    pagination.value.current_page = 1;
+
+    // Limpa filtros locais para evitar inconsistência
+    selectedStatuses.value = [];
+    selectedOwners.value = [];
+    selectedResponsibles.value = [];
+    selectedPriorities.value = [];
+    selectedComplexities.value = [];
+
+    // Busca os dados novamente com a nova configuração
     await tasksStore.getTasks(
       search.value,
       selectedSegment.value,
-      1, // Volta para primeira página
+      1,
       {
-        ...filters.value,
+        show_all: showAllTasks.value,
+        filter_month: selectedMonth.value,
+        filter_year: selectedYear.value,
         per_page: value
       }
     );
@@ -529,6 +545,7 @@ const handlePerPageChange = async (value) => {
     console.error('Erro ao atualizar paginação:', error);
   }
 };
+
 </script>
 <style scoped>
 .d-flex {
@@ -571,6 +588,12 @@ const handlePerPageChange = async (value) => {
 .filter-date-section {
   display: flex;
   flex-direction: column;
+  flex: 0 1 auto;
+}
+
+.ml-auto {
+  margin-left: auto;
+  margin-right: 16px;
 }
 
 .text-caption {

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
+import { useMeStore } from '@/stores/me';
 
 export const useTasksStore = defineStore('tasks', {
   state: () => ({
@@ -19,7 +20,7 @@ export const useTasksStore = defineStore('tasks', {
     pagination: {
       current_page: 1,
       last_page: 1,
-      per_page: 15,
+      per_page: 5,
       total: 0,
     },
   }),
@@ -27,11 +28,14 @@ export const useTasksStore = defineStore('tasks', {
   actions: {
     async getTasks(search = '', segment = '0', page = 1, filters = {}) {
       try {
+        const meStore = useMeStore();
+        const defaultPerPage = meStore.user?.default_pagination || 5;
+
         const params = {
           search,
           segment,
           page,
-          per_page: 15,
+          per_page: filters.per_page || defaultPerPage,
           show_all: filters.show_all || false,
           sort_by: filters.sortBy || 'created_at',
           sort_order: filters.sortOrder || 'desc',
@@ -39,9 +43,10 @@ export const useTasksStore = defineStore('tasks', {
         };
 
         console.log('Requesting tasks with params:', params);
+        console.log('Tasks recebidas:', this.tasks);
 
         const response = await axios.get('api/tasks', { params });
-        this.tasks = response.data.data;
+        this.tasks.splice(0, this.tasks.length, ...response.data.data);
         this.pagination = {
           current_page: response.data.current_page,
           last_page: response.data.last_page,

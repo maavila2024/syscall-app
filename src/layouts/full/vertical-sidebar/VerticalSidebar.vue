@@ -15,7 +15,10 @@ import { useMeStore } from '@/stores/me';
 const customizer = useCustomizerStore();
 const sidebarMenu = shallowRef(sidebarItems);
 const meStore = useMeStore();
-const isAdmin = computed(() => meStore.user.teams.some(team => team.is_admin));
+const isAdmin = computed(() => {
+  return meStore.user?.teams?.some(team => team.is_admin);
+});
+
 </script>
 
 <template>

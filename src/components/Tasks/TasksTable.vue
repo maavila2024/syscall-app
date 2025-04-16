@@ -428,8 +428,8 @@ const tasksStore = useTasksStore();
 const route = useRoute();
 const router = useRouter();
 const { tasks, toShow, toEdit, toDelete, taskFiles, pagination } = storeToRefs(tasksStore);
-const isAdmin = computed(() =>
-  meStore.user.teams.some((team) => team.is_admin)
+const isAdmin = computed(() => 
+  meStore.user?.teams?.some((team) => team.is_admin) || false
 );
 const emit = defineEmits(["update:filters", "update:page"]);
 
@@ -609,7 +609,10 @@ const filteredTasks = computed(() => {
       );
     const segmentMatch =
       meStore.user?.default_segment == 0 ||
-      task.segment == meStore.user?.default_segment;
+      String(task.segment) === String(meStore.user?.default_segment) ||
+      task.segment == null;
+
+
 
     return (
       statusMatch &&
@@ -621,6 +624,11 @@ const filteredTasks = computed(() => {
     );
   });
 });
+
+watch(filteredTasks, (val) => {
+  console.log('⚠️ filteredTasks atualizadas:', val);
+});
+
 
 const getStatusStyle = (taskStatus) => {
   return {
@@ -645,6 +653,10 @@ watch(
     tasksStore.getTasks(query);
   }
 );
+
+watch(() => pagination.per_page, () => {
+  currentPage.value = 1;
+});
 
 const handleExportCSV = () => {
   exportToCSV(filteredTasks.value, "tasks.csv");

@@ -1,4 +1,4 @@
-# ... outras entradas ...
 .history/
-.history/*
-*/.history/* 
+.env
+dist/
+node_modules/
