@@ -2,15 +2,34 @@
   <div>
     <div class="mb-5 pb-5 border-b border-opacity-100">
       <v-row align="center" justify="space-between" class="mb-4">
-        <v-col cols="12" lg="4" md="4">
+        <v-col cols="12" lg="6" md="6" class="d-flex align-center">
           <v-text-field
+            class="mr-4"
             density="compact"
             v-model="search"
             label="Pesquisar Chamados"
             append-inner-icon="mdi-magnify"
             hide-details
             variant="outlined"
+            style="flex: 1"
           ></v-text-field>
+
+          <v-select
+            v-model="perPage"
+            :items="[5, 10, 15, 20, 25, 50, 100]"
+            label="Itens por página"
+            density="compact"
+            variant="outlined"
+            style="width: 150px"
+            hide-details
+          />
+          <v-btn
+            color="primary"
+            class="ml-4"
+            @click="exportTasks"
+          >
+            Exportar CSV
+          </v-btn>
         </v-col>
         <v-col cols="12" lg="2" md="2" class="text-right">
           <v-dialog width="800" persistent>
@@ -97,6 +116,14 @@
               >
                 Filtrar
               </v-btn>
+              <v-btn 
+                color="error" 
+                class="mr-4"
+                @click="resetFilters"
+              >
+                Limpar Filtros
+              </v-btn>
+
             </div>
           </div>
         </v-col>
@@ -110,6 +137,7 @@
     />
     <template v-else>
       <TasksTable
+        :per-page="perPage"
         @openChat="openChatModal"
         @addNote="openAddNoteModal"
         @openAttachments="openAttachmentsModal"
@@ -222,24 +250,87 @@ import { useTasksStore } from "@/stores/apps/tasks";
 import { useChatStore } from "@/stores/apps/chats";
 import { useMeStore } from "@/stores/me";
 import { useRoute } from "vue-router";
+import { exportToCSV } from "@/utils/exportToCSV"; 
 
 const route = useRoute();
-const meStore = useMeStore();
-const tasksStore = useTasksStore();
-const { pagination } = storeToRefs(tasksStore);
-const { toShow, toEdit, toDelete } = storeToRefs(tasksStore);
 
+// Utility functions
+const debounce = (fn, delay) => {
+  let timeoutID;
+  return (...args) => {
+    clearTimeout(timeoutID);
+    timeoutID = setTimeout(() => fn(...args), delay);
+  };
+};
+
+// Store refs
+const tasksStore = useTasksStore();
+const meStore = useMeStore();
 const chatStore = useChatStore();
+const { tasks, toShow, toEdit, toDelete, taskFiles, pagination } = storeToRefs(tasksStore);
 const { messages } = storeToRefs(chatStore);
 
+const exportTasks = () => {
+  exportToCSV(tasks.value, 'tasks.csv'); 
+};
+
+// Estado local - Refs
+const perPage = ref(meStore.user?.default_pagination || 10);
+const search = ref('');
+const selectedSegment = ref(meStore.user?.default_segment || '0');
 const isLoading = ref(false);
+const isSpecificSearch = ref(false);
+const showAllTasks = ref(false);
+const selectedMonth = ref(null);
+const selectedYear = ref(new Date().getFullYear());
+const deleting = ref(false);
+const newNote = ref('');
+const loggedInUserId = ref(meStore.user.id);
+const selectedTaskId = ref(null);
 
-const { priori } = useAsyncState(tasksStore.getPriorities());
-const { complexity } = useAsyncState(tasksStore.getComplexities());
-const { tasksStatus } = useAsyncState(tasksStore.getTasksStatus());
-const { users } = useAsyncState(tasksStore.getUsers());
-const selectedFilters = ref({});
+// Refs para modais
+const showChatModal = ref(false);
+const showAddNoteModal = ref(false);
+const showAttachmentsModal = ref(false);
 
+// Estado dos filtros
+const tableFilters = ref({
+  taskStatus: [],
+  userOwner: [],
+  userResponsible: [],
+  priority: [],
+  complexity: []
+});
+
+// Constantes
+const months = [
+  { title: 'Janeiro', value: 1 },
+  { title: 'Fevereiro', value: 2 },
+  { title: 'Março', value: 3 },
+  { title: 'Abril', value: 4 },
+  { title: 'Maio', value: 5 },
+  { title: 'Junho', value: 6 },
+  { title: 'Julho', value: 7 },
+  { title: 'Agosto', value: 8 },
+  { title: 'Setembro', value: 9 },
+  { title: 'Outubro', value: 10 },
+  { title: 'Novembro', value: 11 },
+  { title: 'Dezembro', value: 12 }
+];
+const years = [2024, 2025].map(y => ({ title: y.toString(), value: y }));
+
+// Funções que dependem do debounce
+const fetchTasksDebounced = debounce(async () => {
+  const page = pagination.value.current_page;
+  await tasksStore.getTasks(search.value, selectedSegment.value, page, {
+    ...tableFilters.value, // Usar os filtros persistentes
+    show_all: showAllTasks.value,
+    filter_month: selectedMonth.value,
+    filter_year: selectedYear.value
+  });
+}, 2000);
+
+// Computed properties
 const isEditing = computed({
   get: () => !!Object.keys(toEdit.value).length,
   set: (value) => { if (!value) toEdit.value = {}; }
@@ -255,7 +346,7 @@ const isDeleting = computed({
   set: (value) => { if (!value) toDelete.value = {}; }
 });
 
-const deleting = ref(false);
+// Funções
 const deleteTask = async (task) => {
   deleting.value = true;
   await tasksStore.deleteTask(task.id);
@@ -263,55 +354,31 @@ const deleteTask = async (task) => {
   deleting.value = false;
 };
 
-const selectedTaskId = ref(0);
-const showChatModal = ref(false);
-const showAddNoteModal = ref(false);
-const newNote = ref("");
-const loggedInUserId = ref(meStore.user.id);
-const openChatModal = (task) => { if (task?.id) { selectedTaskId.value = task.id; showChatModal.value = true; } };
-const openAddNoteModal = (task) => { if (task?.id) { selectedTaskId.value = task.id; showAddNoteModal.value = true; } };
 const addNote = async () => {
   await chatStore.addMessage(selectedTaskId.value, newNote.value, loggedInUserId.value);
   newNote.value = "";
   showAddNoteModal.value = false;
 };
 
-const showAttachmentsModal = ref(false);
-const openAttachmentsModal = (task) => { if (task?.id) { selectedTaskId.value = task.id; showAttachmentsModal.value = true; } };
-
-const search = ref("");
-const isSpecificSearch = ref(false);
-const selectedSegment = ref(meStore.user?.default_segment || "0");
-const selectedPriorities = ref([]);
-const selectedComplexities = ref([]);
-const selectedStatuses = ref([]);
-const selectedResponsibles = ref([]);
-const selectedOwners = ref([]);
-
-const filters = computed(() => ({
-  priority: selectedPriorities.value,
-  complexity: selectedComplexities.value,
-  taskStatus: selectedStatuses.value,
-  userResponsible: selectedResponsibles.value,
-  userOwner: selectedOwners.value
-}));
-
-const showAllTasks = ref(false);
-const applyFilters = (newFilters) => {
-  selectedPriorities.value = newFilters.priority || [];
-  selectedComplexities.value = newFilters.complexity || [];
-  selectedStatuses.value = newFilters.taskStatus || [];
-  selectedResponsibles.value = newFilters.userResponsible || [];
-  selectedOwners.value = newFilters.userOwner || [];
-  fetchTasksDebounced(pagination.value.current_page);
+const openAttachmentsModal = (task) => {
+  if (task?.id) {
+    selectedTaskId.value = task.id;
+    showAttachmentsModal.value = true;
+  }
 };
 
-const debounce = (fn, delay) => {
-  let timeoutID;
-  return (...args) => {
-    clearTimeout(timeoutID);
-    timeoutID = setTimeout(() => fn(...args), delay);
-  };
+const openChatModal = (task) => {
+  if (task?.id) {
+    selectedTaskId.value = task.id;
+    showChatModal.value = true;
+  }
+};
+
+const openAddNoteModal = (task) => {
+  if (task?.id) {
+    selectedTaskId.value = task.id;
+    showAddNoteModal.value = true;
+  }
 };
 
 const updateUserSegment = async () => {
@@ -327,92 +394,149 @@ const handleShowAllChange = async (value) => {
   try {
     isLoading.value = true;
     pagination.value.current_page = 1;
-    await tasksStore.getTasks(search.value, selectedSegment.value, 1, { ...filters.value, show_all: value });
-    await fetchTasksDebounced();
+    await tasksStore.getTasks(
+      search.value,
+      selectedSegment.value,
+      1,
+      {
+        ...tableFilters.value, // Usar os filtros persistentes
+        show_all: value,
+        filter_month: selectedMonth.value,
+        filter_year: selectedYear.value
+      }
+    );
   } finally {
     isLoading.value = false;
   }
 };
 
-const fetchTasksDebounced = debounce(async () => {
-  const page = pagination.value.current_page;
-  await tasksStore.getTasks(search.value, selectedSegment.value, page, {
-    ...filters.value,
-    show_all: showAllTasks.value,
-  });
-}, 2000);
-
-watch([search, selectedSegment, filters], () => {
-  fetchTasksDebounced(pagination.value.current_page);
-}, { deep: true });
-
-watch(() => pagination.value.current_page, () => {
-  fetchTasksDebounced();
-});
+//watch([search, selectedSegment, tableFilters], () => {
+  //fetchTasksDebounced(pagination.value.current_page);
+//}, { deep: true });
 
 onMounted(async () => {
-  console.log('🔥 Página de tarefas montada com sucesso');
-  console.log('📊 Estado inicial:', {
-    search: search.value,
-    segment: selectedSegment.value,
-    pagination: pagination.value,
-    filters: filters.value
-  });
+  console.log('🚀 Iniciando busca padrão');
+  try {
+    await tasksStore.getPriorities();
+    await tasksStore.getComplexities();
+    await tasksStore.getTasksStatus();
+    await tasksStore.getUsers();
+    await tasksStore.fetchFilterOptions();
 
-  const query = route.query.search || "";
-  if (query) {
-    isSpecificSearch.value = true;
-    try {
-      console.log('�� Buscando tasks com query:', query);
-      await tasksStore.getTasks(query, selectedSegment.value, pagination.value.current_page, filters.value);
-      console.log('✅ Tasks carregadas:', tasksStore.tasks);
-    } catch (error) {
-      console.error('❌ Erro ao carregar tasks:', error);
-    } finally {
-      isSpecificSearch.value = false;
-    }
-  } else {
-    console.log('🔄 Iniciando busca padrão');
-    fetchTasksDebounced(pagination.value.current_page);
+
+    // busca inicial: não mostra concluídos/cancelados
+    await tasksStore.getTasks(
+      search.value,
+      selectedSegment.value,
+      1,
+      {
+        ...tableFilters.value,
+        per_page: perPage.value,
+        show_all: false // <- essencial
+      }
+    );
+  } catch (error) {
+    console.error('❌ Erro ao carregar tasks:', error);
   }
 });
 
-const handlePageChange = async (page) => {
-  pagination.value.current_page = page;
-  await tasksStore.getTasks(search.value, selectedSegment.value, page, {
-    ...filters.value,
-    show_all: showAllTasks.value
-  });
+const buildTaskParams = () => {
+  const base = {
+    ...tableFilters.value,
+    per_page: perPage.value,
+    show_all: showAllTasks.value,
+    filter_month: selectedMonth.value,
+    filter_year: selectedYear.value,
+  };
+
+  if (selectedMonth.value && selectedYear.value) {
+    base.filter_month = selectedMonth.value;
+    base.filter_year = selectedYear.value;
+  }
+
+  return base;
 };
 
-const months = [
-  { title: 'Janeiro', value: 1 },
-  { title: 'Fevereiro', value: 2 },
-  { title: 'Março', value: 3 },
-  { title: 'Abril', value: 4 },
-  { title: 'Maio', value: 5 },
-  { title: 'Junho', value: 6 },
-  { title: 'Julho', value: 7 },
-  { title: 'Agosto', value: 8 },
-  { title: 'Setembro', value: 9 },
-  { title: 'Outubro', value: 10 },
-  { title: 'Novembro', value: 11 },
-  { title: 'Dezembro', value: 12 }
-];
-        
-const years = [2024, 2025].map(y => ({ title: y.toString(), value: y }));
-const selectedMonth = ref(null);
-const selectedYear = ref(new Date().getFullYear());
+const fetchTasks = async (page = 1) => {
+  try {
+    isLoading.value = true;
+    await tasksStore.getTasks(search.value, selectedSegment.value, page, buildTaskParams());
+
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+
+watch(perPage, async () => {
+  pagination.value.current_page = 1;
+  await fetchTasks(1);
+});
+
+const applyFilters = async (newFilters) => {
+  console.log('📥 Recebendo novos filtros:', newFilters);
+
+  tableFilters.value = {
+    ...tableFilters.value,
+    ...newFilters,
+  };
+
+  pagination.value.current_page = 1;
+  await fetchTasks(1);
+  
+};
+
+
+const handlePageChange = async (page) => {
+  pagination.value.current_page = page;
+  await fetchTasks(page);
+};
 
 const applyDateFilter = async () => {
   if (!selectedMonth.value || !selectedYear.value) return;
-  await tasksStore.getTasks(search.value, selectedSegment.value, pagination.value.current_page, {
-    ...filters.value,
-    show_all: true,
-    filter_month: selectedMonth.value,
-    filter_year: selectedYear.value
-  });
+
+  await tasksStore.getTasks(
+    search.value,
+    selectedSegment.value,
+    pagination.value.current_page,
+    {
+      ...tableFilters.value,
+      taskStatus: ['Concluído'],
+      show_all: true,
+      filter_month: selectedMonth.value,
+      filter_year: selectedYear.value
+    }
+  );
 };
+
+const resetFilters = async () => {
+  selectedMonth.value = null;
+  selectedYear.value = new Date().getFullYear();
+
+  showAllTasks.value = false;
+  tableFilters.value = {
+    taskStatus: [],
+    userOwner: [],
+    userResponsible: [],
+    priority: [],
+    complexity: []
+  };
+
+  pagination.value.current_page = 1;
+
+  await tasksStore.getTasks(
+    search.value,
+    selectedSegment.value,
+    1,
+    {
+      ...tableFilters.value,
+      per_page: perPage.value,
+      show_all: false
+    }
+  );
+};
+
+
 </script>
 
 <style scoped>

@@ -24,51 +24,93 @@ export const useTasksStore = defineStore('tasks', {
       per_page: 5,
       total: 0,
     },
+    filterOptions: {
+      owners: [],
+      responsibles: [],
+      statuses: [],
+      priorities: [],
+      complexities: []
+    }
   }),
 
   actions: {
     async getTasks(search = '', segment = '0', page = 1, filters = {}) {
       try {
-        console.log('📡 Iniciando requisição getTasks:', { search, segment, page, filters });
+        console.log('📥 Iniciando requisição getTasks:', { search, segment, page, filters });
+
+        const serializeArray = (val) => {
+          if (!val) return [];
+          if (Array.isArray(val)) return [...val];
+          return [];
+        };
+
+        // Garantir que per_page seja sempre válido
+        const perPage = Number(filters.per_page);
+        const safePerPage = Number.isInteger(perPage) && perPage > 0 ? perPage : 10;
+        
         const params = {
           search,
           segment,
           page,
-          per_page: 5,
-          show_all: filters.show_all || false,
-          sort_by: filters.sortBy || 'created_at',
-          sort_order: filters.sortOrder || 'desc',
-          ...filters
+          per_page: safePerPage,
+          taskStatus: serializeArray(filters.taskStatus),
+          userResponsible: serializeArray(filters.userResponsible),
+          userOwner: serializeArray(filters.userOwner),
+          priority: serializeArray(filters.priority),
+          complexity: serializeArray(filters.complexity),
+          show_all: String(filters.show_all ?? false),
         };
-          
-        console.log('Requesting tasks with params:', params);
 
-        const response = await axios.get('api/tasks', { params });
-        console.log('✅ Resposta do backend:', response.data);
-        
-        // Limpa o array atual
+        // Processamento dos filtros de data
+        if (filters.filter_month != null && filters.filter_year != null) {
+          const month = parseInt(filters.filter_month);
+          const year = parseInt(filters.filter_year);
+          
+          if (!isNaN(month) && !isNaN(year) && month > 0 && month <= 12 && year > 2000) {
+            params.filter_month = month;
+            params.filter_year = year;
+          }
+        }
+
+        console.log('📤 Parâmetros da requisição:', params);
+
+        const response = await axios.get('api/tasks', {
+          params,
+          paramsSerializer: params => {
+            const searchParams = new URLSearchParams();
+          
+            for (const key in params) {
+              const value = params[key];
+          
+              if (Array.isArray(value)) {
+                value.forEach(v => searchParams.append(key + '[]', v));
+              } else {
+                searchParams.set(key, String(value));
+              }
+            }
+          
+            return searchParams.toString();
+          }
+          
+        });
+
+        // Limpar e atualizar tasks
         this.tasks = [];
-        
-        // Força atualização do Vue com os novos dados
         await nextTick();
-        
-        // Atualiza com os novos dados
         this.tasks = response.data.data;
-        console.log('📊 Tasks atualizadas:', this.tasks.length);
-        
+
+        // Atualizar paginação mantendo per_page consistente
         this.pagination = {
-          current_page: response.data.current_page,
-          last_page: response.data.last_page,
-          per_page: response.data.per_page,
-          total: response.data.total,
+          current_page: response.data.meta.current_page,
+          last_page: response.data.meta.last_page,
+          per_page: response.data.meta.per_page,
+          total: response.data.meta.total,
         };
-        console.log('📄 Paginação atualizada:', this.pagination);
 
         return response.data;
       } catch (error) {
         console.error('❌ Erro em getTasks:', error);
-        console.error('Stack:', error.stack);
-        throw error; // Propaga o erro para ser tratado no componente
+        throw error;
       }
     },
 
@@ -77,7 +119,7 @@ export const useTasksStore = defineStore('tasks', {
         const response = await axios.get('api/priorities');
         this.priori = response.data.data;
       } catch (error) {
-        console.error('Error fetching priorities:', error);
+        console.error('Erro ao buscar prioridades:', error);
       }
     },
 
@@ -86,7 +128,7 @@ export const useTasksStore = defineStore('tasks', {
         const response = await axios.get('api/complexities');
         this.complexity = response.data.data;
       } catch (error) {
-        console.error('Error fetching complexities:', error);
+        console.error('Erro ao buscar complexidades:', error);
       }
     },
 
@@ -95,7 +137,7 @@ export const useTasksStore = defineStore('tasks', {
         const response = await axios.get('api/users');
         this.users = response.data.data;
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error('Erro ao buscar usuários:', error);
       }
     },
 
@@ -104,35 +146,32 @@ export const useTasksStore = defineStore('tasks', {
         const response = await axios.get('api/tasks-status');
         this.taskStatus = response.data.data;
       } catch (error) {
-        console.error('Error fetching task statuses:', error);
+        console.error('Erro ao buscar status de tarefas:', error);
       }
     },
 
     async storeTask(payload, files) {
       try {
         const response = await axios.post('api/tasks', payload);
-        // this.tasks.push(task);
         const task = response.data;
         await this.getTasks();
-        // Se houver arquivos, faz o upload de cada um associado à task criada
+
         if (files && files.length > 0) {
           const formData = new FormData();
           formData.append('task_id', task.id);
           for (const file of files) {
             formData.append('files[]', file);
           }
-
           await this.uploadTaskFile(formData);
         }
 
         return task;
       } catch (error) {
-        console.error('Error storing task:', error);
+        console.error('Erro ao salvar tarefa:', error);
       }
     },
 
     async updateTask(taskId, payload) {
-      
       try {
         const response = await axios.put(`api/tasks/${taskId}`, payload);
         const task = response.data.data;
@@ -140,7 +179,7 @@ export const useTasksStore = defineStore('tasks', {
         this.tasks.splice(idx, 1, task);
         await this.getTasks();
       } catch (error) {
-        console.error('Error updating task:', error);
+        console.error('Erro ao atualizar tarefa:', error);
       }
     },
 
@@ -148,9 +187,11 @@ export const useTasksStore = defineStore('tasks', {
       try {
         await axios.delete(`api/tasks/${taskId}`);
         const idx = this.tasks.findIndex(o => o.id === taskId);
-        this.tasks.splice(idx, 1);
+        if (idx !== -1) {
+          this.tasks.splice(idx, 1);
+        }
       } catch (error) {
-        console.error('Error deleting task:', error);
+        console.error('Erro ao deletar tarefa:', error);
       }
     },
 
@@ -163,22 +204,20 @@ export const useTasksStore = defineStore('tasks', {
         });
         return response.data;
       } catch (error) {
-        console.error('Error uploading task file:', error);
+        console.error('Erro ao enviar arquivos:', error);
         throw error;
       }
     },
 
-    // Adicionando a função getTaskFiles   
     async getTaskFiles(taskId) {
       try {
         const response = await axios.get(`api/task-file/${taskId}`);
         this.taskFiles = response.data.data;
       } catch (error) {
-        console.error('Error fetching task files:', error);
+        console.error('Erro ao buscar arquivos da tarefa:', error);
       }
     },
 
-    // Adicionando a função deleteTaskFile
     async deleteTaskFile(fileId) {
       try {
         await axios.delete(`api/task-file/${fileId}`);
@@ -187,7 +226,7 @@ export const useTasksStore = defineStore('tasks', {
           this.taskFiles.splice(idx, 1);
         }
       } catch (error) {
-        console.error('Error deleting task file:', error);
+        console.error('Erro ao excluir arquivo da tarefa:', error);
       }
     },
 
@@ -196,21 +235,31 @@ export const useTasksStore = defineStore('tasks', {
         const response = await axios.get('api/tasks/statistics');
         this.taskStatistics = response.data;
       } catch (error) {
-        console.error('Error fetching task statistics:', error);
+        console.error('Erro ao buscar estatísticas:', error);
       }
     },
 
     async fetchTaskStatisticsBySegment(segment, date) {
       try {
-        // Supondo que a API backend aceita uma data no formato "YYYY-MM"
         const response = await axios.get('api/tasks/chart-statistics', {
           params: { segment, date }
         });
         return response.data;
       } catch (error) {
-        console.error('Error fetching task statistics:', error);
+        console.error('Erro ao buscar estatísticas segmentadas:', error);
         throw error;
       }
-    }    
+    },
+
+    async fetchFilterOptions() {
+      try {
+        const response = await axios.get('/api/tasks/filters-data');
+        this.filterOptions = response.data;
+        return response.data;
+      } catch (error) {
+        console.error('Erro ao buscar opções de filtro:', error);
+        throw error;
+      }
+    }
   },
 });

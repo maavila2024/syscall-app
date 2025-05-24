@@ -190,7 +190,9 @@ const { value: priority_id } = useField("priority_id");
 const { value: task_status_id } = useField("task_status_id");
 
 // Ensure default priority and task status are set after form is initialized
-onMounted(() => {
+onMounted(async () => {
+  await tasksStore.getPriorities();
+  await tasksStore.getTasksStatus();
   if (defaultPriority.value && !priority_id.value) {
     priority_id.value = defaultPriority.value;
   }
