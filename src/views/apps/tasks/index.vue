@@ -9,11 +9,11 @@
             v-model="search"
             label="Pesquisar Chamados"
             append-inner-icon="mdi-magnify"
+            @click:append-inner="() => fetchTasks(1)"
             hide-details
             variant="outlined"
             style="flex: 1"
-          ></v-text-field>
-
+          />
           <v-select
             v-model="perPage"
             :items="[5, 10, 15, 20, 25, 50, 100]"
@@ -472,6 +472,12 @@ watch(perPage, async () => {
   pagination.value.current_page = 1;
   await fetchTasks(1);
 });
+
+watch(search, () => {
+  pagination.value.current_page = 1;
+  fetchTasksDebounced();
+});
+
 
 const applyFilters = async (newFilters) => {
   console.log('📥 Recebendo novos filtros:', newFilters);
