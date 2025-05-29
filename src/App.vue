@@ -16,7 +16,7 @@ const isSessionExpired = ref(false); // Controla a visibilidade do modal
 const router = useRouter();
 
 // Define o tempo de inatividade (em milissegundos)
-const { idle } = useIdle(10 * 60 * 60 * 1000); // 10 horas
+const { idle } = useIdle(30 * 60 * 1000); // 30 minutos
 
 // Observa o estado de inatividade
 watch(idle, (isIdle) => {

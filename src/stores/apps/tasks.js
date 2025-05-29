@@ -59,6 +59,8 @@ export const useTasksStore = defineStore('tasks', {
           priority: serializeArray(filters.priority),
           complexity: serializeArray(filters.complexity),
           show_all: String(filters.show_all ?? false),
+          sort_by: filters.sort_by ?? 'created_at',
+          sort_order: filters.sort_order ?? 'desc',
         };
 
         // Processamento dos filtros de data

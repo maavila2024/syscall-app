@@ -251,6 +251,8 @@ import { useChatStore } from "@/stores/apps/chats";
 import { useMeStore } from "@/stores/me";
 import { useRoute } from "vue-router";
 import { exportToCSV } from "@/utils/exportToCSV"; 
+import axios from 'axios';
+
 
 const route = useRoute();
 
@@ -292,6 +294,9 @@ const selectedTaskId = ref(null);
 const showChatModal = ref(false);
 const showAddNoteModal = ref(false);
 const showAttachmentsModal = ref(false);
+
+const sortBy = ref('created_at');
+const sortOrder = ref('desc');
 
 // Estado dos filtros
 const tableFilters = ref({
@@ -415,7 +420,12 @@ const handleShowAllChange = async (value) => {
 //}, { deep: true });
 
 onMounted(async () => {
-  console.log('🚀 Iniciando busca padrão');
+  await meStore.getMe(); // <- garante que os dados do usuário estão carregados
+
+  // Atualiza o valor de perPage com base nas preferências do usuário
+  if (meStore.user?.default_pagination) {
+    perPage.value = meStore.user.default_pagination;
+  }
   try {
     await tasksStore.getPriorities();
     await tasksStore.getComplexities();
@@ -447,6 +457,8 @@ const buildTaskParams = () => {
     show_all: showAllTasks.value,
     filter_month: selectedMonth.value,
     filter_year: selectedYear.value,
+    sort_by: sortBy.value,
+    sort_order: sortOrder.value,
   };
 
   if (selectedMonth.value && selectedYear.value) {
@@ -486,6 +498,9 @@ const applyFilters = async (newFilters) => {
     ...tableFilters.value,
     ...newFilters,
   };
+
+  if (newFilters.sort_by) sortBy.value = newFilters.sort_by;
+  if (newFilters.sort_order) sortOrder.value = newFilters.sort_order;
 
   pagination.value.current_page = 1;
   await fetchTasks(1);
@@ -540,7 +555,25 @@ const resetFilters = async () => {
       show_all: false
     }
   );
+  
 };
+
+watch(perPage, async (newPerPage) => {
+  try {
+    pagination.value.current_page = 1;
+
+    // Atualiza no backend
+    await axios.put('/api/users/update-pagination', {
+      default_pagination: newPerPage
+    });
+
+    // Recarrega os dados com a nova paginação
+    await fetchTasks(1);
+  } catch (error) {
+    console.error('Erro ao salvar preferência de paginação:', error);
+  }
+});
+
 
 
 </script>

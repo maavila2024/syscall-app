@@ -319,7 +319,7 @@ const { handleSubmit, errors, isSubmitting, setFieldValue, setErrors } = useForm
     finish_date: props.task.finish_date ? props.task.finish_date.split('T')[0] : null,
     expected_date: props.task.expected_date ? props.task.expected_date.split('T')[0] : null,
     created_at: props.task.created_at ? props.task.created_at.split('T')[0] : null,
-    status: props.task.status,
+    status: Boolean(props.task.status ?? true),
   }
 });
 
@@ -352,7 +352,7 @@ watch(errors, (newErrors) => {
   console.log(errors)
   focusFirstErrorField();
 });
-
+/*
 const submit = handleSubmit(async (payload) => {
   if (!shouldShowPriorityJustification.value) {
     delete payload.priority_justification;
@@ -374,6 +374,34 @@ const submit = handleSubmit(async (payload) => {
   await tasksStore.updateTask(props.task.id, payload);
   emit("edit");
 });
+*/
+const submit = handleSubmit(async (payload) => {
+  try {
+    if (!shouldShowPriorityJustification.value) {
+      delete payload.priority_justification;
+    }
+
+    if (!expected_date.value) {
+      payload.expected_date = null;
+    }
+    if (!finish_date.value) {
+      payload.finish_date = null;
+    }
+
+    if (!payload.complexity_id) {
+      payload.complexity_id = 4;
+      payload.complexity_justification = '';
+    }
+
+    console.log('Payload being sent to the backend:', payload);
+    await tasksStore.updateTask(props.task.id, payload);
+    emit("edit");
+  } catch (error) {
+    console.error("Erro ao submeter formulário de edição:", error);
+    feedbackMessage.value = "Erro ao salvar edição. Verifique os campos obrigatórios.";
+  }
+});
+
 
 const feedbackMessage = ref("");
 const { value: segment } = useField('segment');

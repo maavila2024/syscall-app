@@ -67,46 +67,78 @@
         </thead>
 
         <tbody>
-          <tr v-if="showOwnerFilter || showResponsibleFilter || showStatusFilter || showPriorityFilter">
-            <td colspan="4"></td>
-            <td v-if="showOwnerFilter">
+          <tr v-if="showOwnerFilter">
+            <td colspan="3"></td>
+            <v-btn @click="resetAllFilters" color="error">Limpar Filtros</v-btn>
+            <td>
               <v-select
                 v-model="selectedOwners"
                 :items="ownerOptions"
+                item-title="title"
+                item-value="value"
                 label="Filtro Solicitante"
                 multiple
-                @change="emitAllFilters"
+                chips
+                :menu-props="{ closeOnContentClick: false }"
               />
             </td>
-            <td v-if="showResponsibleFilter">
+            <td colspan="2"><v-btn color="primary" @click="emitAllFilters">Aplicar Filtros</v-btn></td>
+          </tr>
+
+          <tr v-if="showResponsibleFilter">
+            <td colspan="4"></td>
+            <v-btn @click="resetAllFilters" color="error">Limpar Filtros</v-btn>
+            <td>
               <v-select
                 v-model="selectedResponsibles"
                 :items="responsibleOptions"
+                item-title="title"
+                item-value="value"
                 label="Filtro Responsável"
                 multiple
-                @change="emitAllFilters"
+                chips
+                :menu-props="{ closeOnContentClick: false }"
               />
             </td>
-            <td v-if="showStatusFilter">
+            <td colspan="3"><v-btn color="primary" @click="emitAllFilters">Aplicar Filtros</v-btn></td>
+          </tr>
+
+          <tr v-if="showStatusFilter">
+            <td colspan="5"></td>
+            <v-btn @click="resetAllFilters" color="error">Limpar Filtros</v-btn>
+            <td>
               <v-select
                 v-model="selectedStatuses"
                 :items="statusOptions"
+                item-title="title"
+                item-value="value"
                 label="Filtro Status"
                 multiple
-                @change="emitAllFilters"
+                chips
+                :menu-props="{ closeOnContentClick: false }"
               />
             </td>
-            <td v-if="showPriorityFilter">
+            <td colspan="3"><v-btn color="primary" @click="emitAllFilters">Aplicar Filtros</v-btn></td>
+          </tr>
+
+          <tr v-if="showPriorityFilter">
+            <td colspan="6"></td>
+            <v-btn @click="resetAllFilters" color="error">Limpar Filtros</v-btn>
+            <td>
               <v-select
                 v-model="selectedPriorities"
                 :items="priorityOptions"
+                item-title="title"
+                item-value="value"
                 label="Filtro Prioridade"
                 multiple
-                @change="emitAllFilters"
+                chips
+                :menu-props="{ closeOnContentClick: false }"
               />
             </td>
-            <td colspan="2"></td>
+            <td colspan="3"><v-btn color="primary" @click="emitAllFilters">Aplicar Filtros</v-btn></td>
           </tr>
+          
 
           <tr v-for="task in tasks" :key="task.id">
             <td>{{ task.task_code }}</td>
@@ -233,6 +265,7 @@ import {
   EyeIcon,
   TableExportIcon,
 } from "vue-tabler-icons";
+import { debounce } from 'lodash';
 
 const emit = defineEmits(["edit", "delete", "show", "openChat", "openAttachments", "update:filters", "update:page"]);
 
@@ -259,11 +292,38 @@ const showOwnerFilter = ref(false);
 const showResponsibleFilter = ref(false);
 const showPriorityFilter = ref(false);
 
-const statusOptions = computed(() => tasksStore.filterOptions.statuses?.map(s => s.name) || []);
-const ownerOptions = computed(() => tasksStore.filterOptions.owners?.map(o => o.first_name) || []);
-const responsibleOptions = computed(() => tasksStore.filterOptions.responsibles?.map(r => r.first_name) || []);
-const priorityOptions = computed(() => tasksStore.filterOptions.priorities?.map(p => p.name) || []);
+const statusOptions = computed(() => 
+tasksStore.filterOptions.statuses?.map(s => ({
+    title: s.name,
+    value: s.name
+  })) || []
+);
+const ownerOptions = computed(() => 
+tasksStore.filterOptions.owners?.map(o => ({
+    title: o.first_name,
+    value: o.first_name
+  })) || []
+);
+//const responsibleOptions = computed(() => tasksStore.filterOptions.responsibles?.map(r => r.first_name) || []);
+const responsibleOptions = computed(() =>
+  tasksStore.filterOptions.responsibles?.map(r => ({
+    title: r.first_name,
+    value: r.first_name
+  })) || []
+);
+const priorityOptions = computed(() => 
+tasksStore.filterOptions.priorities?.map(p => ({
+    title: p.name,
+    value: p.name
+  })) || []
+);
 
+const debouncedEmitFilters = debounce(() => {
+  emitAllFilters();
+}, 600);
+
+/*
+Comentado temporariamente para impedir que o v-select feche após a primeira seleção.
 watch(
   [selectedStatuses, selectedOwners, selectedResponsibles, selectedPriorities],
   () => {
@@ -271,6 +331,8 @@ watch(
   },
   { deep: true }
 );
+*/
+
 
 const props = defineProps({
   perPage: {
@@ -292,8 +354,11 @@ const emitAllFilters = () => {
     priority: selectedPriorities.value,
     page: currentPage.value,
     per_page: props.perPage,
+    sort_by: sortBy.value,
+    sort_order: sortOrder.value,
   });
 };
+
 
 const totalPages = computed(() => Math.ceil(pagination.value.total / pagination.value.per_page));
 const handlePageChange = (page) => {
@@ -301,6 +366,34 @@ const handlePageChange = (page) => {
   emit("update:page", page);
  // emitAllFilters();
 };
+
+const sortTable = (column) => {
+  if (sortBy.value === column) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortBy.value = column;
+    sortOrder.value = 'asc';
+  }
+
+  emit("update:filters", {
+  taskStatus: selectedStatuses.value,
+  userOwner: selectedOwners.value,
+  userResponsible: selectedResponsibles.value,
+  priority: selectedPriorities.value,
+  page: currentPage.value,
+  per_page: props.perPage,
+  sort_by: sortBy.value,
+  sort_order: sortOrder.value,
+});
+
+};
+const resetAllFilters = () => {
+  selectedStatuses.value = []
+  selectedOwners.value = []
+  selectedResponsibles.value = []
+  selectedPriorities.value = []
+  emitAllFilters()
+}
 </script>
 
 <style scoped>
