@@ -1,251 +1,215 @@
 <template>
   <div class="tasks-table-container">
-    <div class="table-wrapper">
-      <v-table class="border-opacity-100">
+    <div class="scrollable-table-wrapper">
+      <v-table class="v-table-fixed-header border-opacity-100">
         <thead>
           <tr>
-            <th class="text-left" style="width: 50px" @click="sortTable('task_code')">
+            <th class="text-left" @click="sortTable('task_code')">
               Chamado
-              <v-icon v-if="sortBy === 'task_code'">
-                {{ sortOrder === "asc" ? "mdi-arrow-up" : "mdi-arrow-down" }}
+              <v-icon v-if="props.sortBy === 'task_code'" :color="props.sortOrder === 'asc' ? 'primary' : 'secondary'">
+                {{ props.sortOrder === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
               </v-icon>
             </th>
-            <th class="text-left" style="width: 50px" @click="sortTable('sequence')">
+            <th class="text-left" @click="sortTable('sequence')">
               Sequência
-              <v-icon v-if="sortBy === 'sequence'">
-                {{ sortOrder === "asc" ? "mdi-arrow-up" : "mdi-arrow-down" }}
+              <v-icon v-if="props.sortBy === 'sequence'" :color="props.sortOrder === 'asc' ? 'primary' : 'secondary'">
+                {{ props.sortOrder === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
               </v-icon>
             </th>
-            <th class="text-left" style="width: 250px" @click="sortTable('name')">
+            <th class="text-left" @click="sortTable('name')">
               Título
-              <v-icon v-if="sortBy === 'name'">
-                {{ sortOrder === "asc" ? "mdi-arrow-up" : "mdi-arrow-down" }}
+              <v-icon v-if="props.sortBy === 'name'" :color="props.sortOrder === 'asc' ? 'primary' : 'secondary'">
+                {{ props.sortOrder === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
               </v-icon>
             </th>
-            <th class="text-left" style="width: 250px" @click="sortTable('expected_date')">
+            <th class="text-left" v-if="showExpectedDate" @click="sortTable('expected_date')">
               Data Prevista
-              <v-icon v-if="sortBy === 'expected_date'">
-                {{ sortOrder === "asc" ? "mdi-arrow-up" : "mdi-arrow-down" }}
+              <v-icon v-if="props.sortBy === 'expected_date'" :color="props.sortOrder === 'asc' ? 'primary' : 'secondary'">
+                {{ props.sortOrder === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
               </v-icon>
             </th>
-            <th class="text-left" style="width: 175px">
-              Solicitante
-              <v-btn icon @click="showOwnerFilter = !showOwnerFilter">
-                <FilterIcon />
-              </v-btn>
+            <th class="text-left">
+              <div class="d-flex align-center gap-1">
+                Solicitante
+                <v-btn icon @click="toggleFilter('owner')">
+                  <FilterIcon />
+                </v-btn>
+              </div>
             </th>
-            <th class="text-left" style="width: 185px">
-              Responsável
-              <v-btn
-                icon
-                @click="showResponsibleFilter = !showResponsibleFilter"
-              >
-                <FilterIcon />
-              </v-btn>
+            <th class="text-left" v-if="showResponsible">
+              <div class="d-flex align-center gap-1">
+                Responsável
+                <v-btn icon @click="toggleFilter('responsible')">
+                  <FilterIcon />
+                </v-btn>
+              </div>
             </th>
-            <th class="text-left" style="width: 135px">
-              Status
-              <v-btn icon @click="showStatusFilter = !showStatusFilter">
-                <FilterIcon />
-              </v-btn>
+            <th class="text-left">
+              <div class="d-flex align-center gap-1">
+                Status
+                <v-btn icon @click="toggleFilter('status')">
+                  <FilterIcon />
+                </v-btn>
+              </div>
             </th>
-            <th class="text-left" style="width: 165px">
-              Prioridade
-              <v-btn icon @click="showPriorityFilter = !showPriorityFilter">
-                <FilterIcon />
-              </v-btn>
+            <th class="text-left" v-if="showPriority">
+              <div class="d-flex align-center gap-1">
+                Prioridade
+                <v-btn icon @click="toggleFilter('priority')">
+                  <FilterIcon />
+                </v-btn>
+              </div>
             </th>
-            <!-- <th class="text-left" style="width: 235px">
-              Complexidade
-              <v-btn icon @click="showComplexityFilter = !showComplexityFilter">
-                <FilterIcon />
-              </v-btn>
-            </th> -->
-            <th class="text-left" style="width: 100px">Ações</th>
-            <th></th>
+            <th class="text-left">Ações</th>
+            <th class="text-right">
+              <v-menu v-model="showColumnSettings" location="bottom end">
+                <template v-slot:activator="{ props }">
+                  <v-btn icon v-bind="props">
+                    <SettingsIcon />
+                  </v-btn>
+                </template>
+                <v-list>
+                  <v-list-item>
+                    <v-checkbox
+                      v-model="showExpectedDate"
+                      label="Exibir Data Prevista"
+                      density="compact"
+                      hide-details
+                    />
+                  </v-list-item>
+                  <v-list-item>
+                    <v-checkbox
+                      v-model="showPriority"
+                      label="Exibir Prioridade"
+                      density="compact"
+                      hide-details
+                    />
+                  </v-list-item>
+                  <v-list-item>
+                    <v-checkbox
+                      v-model="showResponsible"
+                      label="Exibir Responsável"
+                      density="compact"
+                      hide-details
+                    />
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </th>
           </tr>
         </thead>
 
         <tbody>
-          <tr v-if="showOwnerFilter">
-            <td colspan="3"></td>
-            <v-btn @click="resetAllFilters" color="error">Limpar Filtros</v-btn>
-            <td>
-              <v-select
-                v-model="selectedOwners"
-                :items="ownerOptions"
-                item-title="title"
-                item-value="value"
-                label="Filtro Solicitante"
-                multiple
-                chips
-                :menu-props="{ closeOnContentClick: false }"
-              />
-            </td>
-            <td colspan="2"><v-btn color="primary" @click="emitAllFilters">Aplicar Filtros</v-btn></td>
-          </tr>
-
-          <tr v-if="showResponsibleFilter">
-            <td colspan="4"></td>
-            <v-btn @click="resetAllFilters" color="error">Limpar Filtros</v-btn>
-            <td>
-              <v-select
-                v-model="selectedResponsibles"
-                :items="responsibleOptions"
-                item-title="title"
-                item-value="value"
-                label="Filtro Responsável"
-                multiple
-                chips
-                :menu-props="{ closeOnContentClick: false }"
-              />
-            </td>
-            <td colspan="3"><v-btn color="primary" @click="emitAllFilters">Aplicar Filtros</v-btn></td>
-          </tr>
-
-          <tr v-if="showStatusFilter">
-            <td colspan="5"></td>
-            <v-btn @click="resetAllFilters" color="error">Limpar Filtros</v-btn>
-            <td>
-              <v-select
-                v-model="selectedStatuses"
-                :items="statusOptions"
-                item-title="title"
-                item-value="value"
-                label="Filtro Status"
-                multiple
-                chips
-                :menu-props="{ closeOnContentClick: false }"
-              />
-            </td>
-            <td colspan="3"><v-btn color="primary" @click="emitAllFilters">Aplicar Filtros</v-btn></td>
-          </tr>
-
-          <tr v-if="showPriorityFilter">
-            <td colspan="6"></td>
-            <v-btn @click="resetAllFilters" color="error">Limpar Filtros</v-btn>
-            <td>
-              <v-select
-                v-model="selectedPriorities"
-                :items="priorityOptions"
-                item-title="title"
-                item-value="value"
-                label="Filtro Prioridade"
-                multiple
-                chips
-                :menu-props="{ closeOnContentClick: false }"
-              />
-            </td>
-            <td colspan="3"><v-btn color="primary" @click="emitAllFilters">Aplicar Filtros</v-btn></td>
-          </tr>
-          
-
-          <tr v-for="task in tasks" :key="task.id">
-            <td>{{ task.task_code }}</td>
-            <td>{{ task.sequence }}</td>
-            <td>{{ task.name }}</td>
-            <td>{{ task.expected_date }}</td>
-            <td>{{ task.user_owner?.first_name }}</td>
-            <td>{{ task.user_responsible?.first_name || 'Nenhum' }}</td>
-            <td>{{ task.task_status?.name }}</td>
-            <td>{{ task.priority?.name }}</td>
-            <td class="text-right">
-              <div class="d-flex align-center">
-                <v-tooltip text="Visualizar Chamado">
-                  <template v-slot:activator="{ props }">
-                    <v-btn icon flat @click="toShow = task" v-bind="props">
-                      <EyeIcon
-                        stroke-width="1.5"
-                        size="20"
-                        class="text-primary"
-                      />
-                    </v-btn>
-                  </template>
-                </v-tooltip>
-                <v-tooltip v-if="isAdmin" text="Editar Chamado">
-                  <template v-slot:activator="{ props }">
-                    <v-btn icon flat @click="toEdit = task" v-bind="props">
-                      <PencilIcon
-                        stroke-width="1.5"
-                        size="20"
-                        class="text-primary"
-                      />
-                    </v-btn>
-                  </template>
-                </v-tooltip>
-                <v-tooltip v-if="isAdmin" text="Deletar Chamado">
-                  <template v-slot:activator="{ props }">
-                    <v-btn icon flat @click="toDelete = task" v-bind="props">
-                      <TrashIcon
-                        stroke-width="1.5"
-                        size="20"
-                        class="text-error"
-                      />
-                    </v-btn>
-                  </template>
-                </v-tooltip>
-                <v-tooltip text="Consultar Notas de Trabalho">
-                  <template v-slot:activator="{ props }">
-                    <v-btn
-                      icon
-                      flat
-                      @click="$emit('openChat', task)"
-                      v-bind="props"
-                    >
-                      <NotesIcon
-                        stroke-width="1.5"
-                        size="20"
-                        class="text-primary"
-                      />
-                    </v-btn>
-                  </template>
-                </v-tooltip>
-                <v-tooltip text="Anexos">
-                  <template v-slot:activator="{ props }">
-                    <v-btn
-                      icon
-                      flat
-                      @click="$emit('openAttachments', task)"
-                      v-bind="props"
-                    >
-                      <PaperclipIcon
-                        stroke-width="1.5"
-                        size="20"
-                        class="text-primary"
-                      />
-                    </v-btn>
-                  </template>
-                </v-tooltip>
-                <!--
-                <v-tooltip text="Exportar CSV">
-                  <template v-slot:activator="{ props }">
-                    <v-btn icon flat @click="handleExportCSV" v-bind="props">
-                      <TableExportIcon
-                        stroke-width="1.5"
-                        size="20"
-                        class="text-primary"
-                      />
-                    </v-btn>
-                  </template>
-                </v-tooltip>
-                -->
+          <tr v-if="showOwnerFilter || showResponsibleFilter || showStatusFilter || showPriorityFilter" class="filtro-row">
+            <td :colspan="10">
+              <div class="d-flex align-center gap-4 px-2">
+                <v-select
+                  v-if="showOwnerFilter"
+                  v-model="selectedOwners"
+                  :items="ownerOptions"
+                  label="Solicitante"
+                  multiple chips hide-details density="compact"
+                />
+                <v-select
+                  v-if="showResponsibleFilter"
+                  v-model="selectedResponsibles"
+                  :items="responsibleOptions"
+                  label="Responsável"
+                  multiple chips hide-details density="compact"
+                />
+                <v-select
+                  v-if="showStatusFilter"
+                  v-model="selectedStatuses"
+                  :items="statusOptions"
+                  label="Status"
+                  multiple chips hide-details density="compact"
+                />
+                <v-select
+                  v-if="showPriorityFilter"
+                  v-model="selectedPriorities"
+                  :items="priorityOptions"
+                  label="Prioridade"
+                  multiple chips hide-details density="compact"
+                />
+                <v-btn color="primary" @click="emitAllFilters">Aplicar</v-btn>
+                <v-btn color="error" @click="resetAllFilters">Limpar</v-btn>
               </div>
             </td>
           </tr>
-        </tbody>
-      </v-table>
-      <div class="d-flex justify-space-between align-center mt-4">
-        <span>Total de Chamados: {{ tasks.length }}</span>
-        <v-btn icon @click="exportCSV"><FileSpreadsheetIcon /></v-btn>
-      </div>
-      <v-pagination
-        v-model="pagination.current_page"
-        :length="pagination.last_page"
-        @update:model-value="handlePageChange"
-      />
-
+          
+          <tr v-for="task in tasks" :key="task.id">
+          <td>{{ task.task_code }}</td>
+          <td>{{ task.sequence }}</td>
+          <td>{{ task.name }}</td>
+          <td v-if="showExpectedDate">{{ task.expected_date }}</td>
+          <td>{{ task.user_owner?.first_name }}</td>
+          <td v-if="showResponsible">{{ task.user_responsible?.first_name || 'Nenhum' }}</td>
+          <td>{{ task.task_status?.name }}</td>
+          <td v-if="showPriority">{{ task.priority?.name }}</td>
+          <td class="text-right">
+            <div class="d-flex align-center">
+              <v-tooltip text="Visualizar Chamado">
+                <template v-slot:activator="{ props }">
+                  <v-btn icon flat @click="toShow = task" v-bind="props">
+                    <EyeIcon stroke-width="1.5" size="20" class="text-primary" />
+                  </v-btn>
+                </template>
+              </v-tooltip>
+              <v-tooltip text="Consultar Notas de Trabalho">
+                <template v-slot:activator="{ props }">
+                  <v-btn icon flat @click="$emit('openChat', task)" v-bind="props">
+                    <NotesIcon stroke-width="1.5" size="20" class="text-primary" />
+                  </v-btn>
+                </template>
+              </v-tooltip>
+              <v-tooltip text="Anexos">
+                <template v-slot:activator="{ props }">
+                  <v-btn icon flat @click="$emit('openAttachments', task)" v-bind="props">
+                    <PaperclipIcon stroke-width="1.5" size="20" class="text-primary" />
+                  </v-btn>
+                </template>
+              </v-tooltip>
+              <template v-if="isAdmin">
+                <v-menu location="bottom end">
+                  <template v-slot:activator="{ props }">
+                    <v-tooltip text="Mais ações">
+                      <template v-slot:activator="{ props: tooltipProps }">
+                        <v-btn icon flat v-bind="Object.assign({}, props, tooltipProps)">
+                          <SettingsIcon stroke-width="1.5" size="20" class="text-primary" />
+                        </v-btn>
+                      </template>
+                    </v-tooltip>
+                  </template>
+                  <v-list>
+                    <v-list-item @click="toEdit = task">
+                      <PencilIcon stroke-width="1.5" size="18" class="mr-2 text-primary" />
+                      <span>Editar</span>
+                    </v-list-item>
+                    <v-list-item @click="toDelete = task">
+                      <TrashIcon stroke-width="1.5" size="18" class="mr-2 text-error" />
+                      <span>Deletar</span>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </template>
+            </div>
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </v-table>
+    <div class="d-flex justify-space-between align-center mt-4">
+      <span>Total de Chamados: {{ tasks.length }}</span>
+      <v-btn icon @click="exportCSV"><FileSpreadsheetIcon /></v-btn>
     </div>
+    <v-pagination
+      v-model="pagination.current_page"
+      :length="pagination.last_page"
+      @update:model-value="handlePageChange"
+    />
+
   </div>
+</div>
 </template>
 
 <script setup>
@@ -264,6 +228,7 @@ import {
   FilterIcon,
   EyeIcon,
   TableExportIcon,
+  SettingsIcon,
 } from "vue-tabler-icons";
 import { debounce } from 'lodash';
 
@@ -279,18 +244,48 @@ const isAdmin = computed(() =>
 const tasksStore = useTasksStore();
 const { tasks, pagination, toShow, toEdit, toDelete } = storeToRefs(tasksStore);
 const currentPage = ref(1);
-const sortBy = ref('');
-const sortOrder = ref('asc');
 
-const selectedStatuses = ref([]);
-const selectedOwners = ref([]);
-const selectedResponsibles = ref([]);
-const selectedPriorities = ref([]);
+const props = defineProps({
+  perPage: Number,
+  sortBy: String,
+  sortOrder: String,
+  filters: {
+    type: Object,
+    default: () => ({
+      taskStatus: [],
+      userOwner: [],
+      userResponsible: [],
+      priority: []
+    })
+  }
+});
+
+const selectedStatuses = ref([...props.filters.taskStatus]);
+const selectedOwners = ref([...props.filters.userOwner]);
+const selectedResponsibles = ref([...props.filters.userResponsible]);
+const selectedPriorities = ref([...props.filters.priority]);
 
 const showStatusFilter = ref(false);
 const showOwnerFilter = ref(false);
 const showResponsibleFilter = ref(false);
 const showPriorityFilter = ref(false);
+
+const showExpectedDate = ref(
+  localStorage.getItem('showExpectedDate') !== null
+    ? JSON.parse(localStorage.getItem('showExpectedDate'))
+    : false
+);
+const showPriority = ref(
+  localStorage.getItem('showPriority') !== null
+    ? JSON.parse(localStorage.getItem('showPriority'))
+    : false
+);
+const showResponsible = ref(
+  localStorage.getItem('showResponsible') !== null
+    ? JSON.parse(localStorage.getItem('showResponsible'))
+    : false
+);
+const showColumnSettings = ref(false);
 
 const statusOptions = computed(() => 
 tasksStore.filterOptions.statuses?.map(s => ({
@@ -333,15 +328,6 @@ watch(
 );
 */
 
-
-const props = defineProps({
-  perPage: {
-    type: Number,
-    required: true,
-  }
-});
-
-
 onMounted(() => {
   tasksStore.fetchFilterOptions();
 });
@@ -354,8 +340,8 @@ const emitAllFilters = () => {
     priority: selectedPriorities.value,
     page: currentPage.value,
     per_page: props.perPage,
-    sort_by: sortBy.value,
-    sort_order: sortOrder.value,
+    sort_by: props.sortBy,
+    sort_order: props.sortOrder,
   });
 };
 
@@ -368,24 +354,20 @@ const handlePageChange = (page) => {
 };
 
 const sortTable = (column) => {
-  if (sortBy.value === column) {
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
-  } else {
-    sortBy.value = column;
-    sortOrder.value = 'asc';
-  }
+  const newSortOrder = props.sortBy === column
+    ? (props.sortOrder === 'asc' ? 'desc' : 'asc')
+    : 'asc';
 
   emit("update:filters", {
-  taskStatus: selectedStatuses.value,
-  userOwner: selectedOwners.value,
-  userResponsible: selectedResponsibles.value,
-  priority: selectedPriorities.value,
-  page: currentPage.value,
-  per_page: props.perPage,
-  sort_by: sortBy.value,
-  sort_order: sortOrder.value,
-});
-
+    taskStatus: selectedStatuses.value,
+    userOwner: selectedOwners.value,
+    userResponsible: selectedResponsibles.value,
+    priority: selectedPriorities.value,
+    page: currentPage.value,
+    per_page: props.perPage,
+    sort_by: column,
+    sort_order: newSortOrder,
+  });
 };
 const resetAllFilters = () => {
   selectedStatuses.value = []
@@ -394,17 +376,114 @@ const resetAllFilters = () => {
   selectedPriorities.value = []
   emitAllFilters()
 }
+
+watch(showExpectedDate, (val) => {
+  localStorage.setItem('showExpectedDate', JSON.stringify(val));
+});
+watch(showPriority, (val) => {
+  localStorage.setItem('showPriority', JSON.stringify(val));
+});
+watch(showResponsible, (val) => {
+  localStorage.setItem('showResponsible', JSON.stringify(val));
+});
+
+const toggleFilter = (type) => {
+  showOwnerFilter.value = type === 'owner';
+  showResponsibleFilter.value = type === 'responsible';
+  showStatusFilter.value = type === 'status';
+  showPriorityFilter.value = type === 'priority';
+};
 </script>
 
-<style scoped>
-.tasks-table-container {
-  max-height: 500px;
+<style>
+.v-table-fixed-header {
+  width: 100%;
+  table-layout: fixed;
+  border-spacing: 0;
+}
+
+.v-table-fixed-header thead,
+.v-table-fixed-header tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.v-table-fixed-header thead th {
+  position: sticky;
+  top: 0;
+  background-color: #2a3447;
+  z-index: 5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.v-table-fixed-header tbody {
+  display: block;
+  max-height: 60vh;
   overflow-y: auto;
 }
 
-.table-wrapper {
-  display: block;
-  font-size: 12px; /* Adicionado para fixar o tamanho da fonte */
+.v-table-fixed-header th,
+.v-table-fixed-header td {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+  padding: 8px;
+}
+
+.v-table-fixed-header th:nth-child(1),
+.v-table-fixed-header td:nth-child(1) { width: 70px; }
+.v-table-fixed-header th:nth-child(2),
+.v-table-fixed-header td:nth-child(2) { width: 80px; }
+.v-table-fixed-header th:nth-child(3),
+.v-table-fixed-header td:nth-child(3) { width: 180px; }
+.v-table-fixed-header th:nth-child(4),
+.v-table-fixed-header td:nth-child(4) { width: 120px; }
+.v-table-fixed-header th:nth-child(5),
+.v-table-fixed-header td:nth-child(5) { width: 120px; }
+.v-table-fixed-header th:nth-child(6),
+.v-table-fixed-header td:nth-child(6) { width: 120px; }
+.v-table-fixed-header th:nth-child(7),
+.v-table-fixed-header td:nth-child(7) { width: 120px; }
+.v-table-fixed-header th:nth-child(8),
+.v-table-fixed-header td:nth-child(8) { width: 120px; }
+.v-table-fixed-header th:nth-child(9),
+.v-table-fixed-header td:nth-child(9) { width: 132px; }
+
+.v-table-fixed-header tbody::-webkit-scrollbar {
+  width: 6px;
+}
+.v-table-fixed-header tbody::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+</style>
+
+
+<!-- Estilos locais -->
+<style>
+.tasks-table-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.scrollable-table-wrapper {
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 280px);
+}
+
+.v-select,
+.v-input {
+  font-size: 12px;
+}
+
+.v-table th .v-btn {
+  padding: 0 !important;
+  min-width: 24px;
 }
 
 .text-clamp {
@@ -413,28 +492,8 @@ const resetAllFilters = () => {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: normal;
   hyphens: auto;
-  word-break: keep-all; /* Impede quebra inadequada de palavras */
-  white-space: normal; /* Permite quebra de linha */
-}
-
-.v-table th,
-.v-table td {
-  font-size: 12px; /* Adicionado para manter o tamanho da fonte */
-}
-
-.v-select,
-.v-input,
-.v-btn {
-  font-size: 12px; /* Adicionado para manter o tamanho da fonte nos inputs e botões */
-}
-
-.v-table thead th {
-  position: sticky;
-  top: 0;
-  background-color: #2a3447; /* ajuste conforme necessário */
-  z-index: 1;
-  border-bottom: 1px solid #424242;
 }
 
 .totalizer {
@@ -442,10 +501,37 @@ const resetAllFilters = () => {
   font-weight: bold;
   margin-right: 20px;
 }
-
 .totalizer-number {
   font-size: 18px;
   font-weight: bold;
-  color: #ffffff; /* Escolha a cor que preferir */
+  color: #ffffff;
+}
+
+.v-table th .v-btn {
+  padding: 0 !important;
+  min-width: 24px;
+}
+.v-table-fixed-header tbody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.v-table-fixed-header tbody::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.v-table-fixed-header th:last-child,
+.v-table-fixed-header td:last-child {
+  width: 20px; /* ou 30px, o mínimo necessário para o botão de engrenagem */
+  padding-right: 4px;
+}
+
+.filtro-row {
+  background-color: #2a3447;
+  height: auto;
+  padding: 0 16px;
+}
+.filtro-row .v-select {
+  max-width: 200px;
 }
 </style>

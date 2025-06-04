@@ -6,15 +6,18 @@
   </div>  
   <v-menu :close-on-content-click="false">
     <template v-slot:activator="{ props }">
-      <v-btn icon variant="text" color="primary" v-bind="props">
-        <v-badge
-          dot
-          :color="unreadNotifications.length > 0 ? '#F44336' : '#2196F3'"
-          class="custom-dot"
-        >
-          <BellIcon stroke-width="1.5" size="42" />
-        </v-badge>
-      </v-btn>
+      <div class="d-flex align-center">
+        <IdleCountdown />
+        <v-btn icon variant="text" color="primary" v-bind="props">
+          <v-badge
+            dot
+            :color="unreadNotifications.length > 0 ? '#F44336' : '#2196F3'"
+            class="custom-dot"
+          >
+            <BellIcon stroke-width="1.5" size="42" />
+          </v-badge>
+        </v-btn>
+      </div>
     </template>
     <v-sheet rounded="md" width="360" elevation="10">
       <div class="px-8 pb-4 pt-6">
@@ -67,10 +70,12 @@ import { onMounted, ref, computed } from "vue";
 import { useMeStore } from "@/stores/me";
 import { useRouter } from "vue-router";
 import { BellIcon } from "vue-tabler-icons";
+import IdleCountdown from '@/components/ui/IdleCountdown.vue';
 
 export default {
   components: {
     BellIcon,
+    IdleCountdown,
   },
   setup() {
     const meStore = useMeStore();

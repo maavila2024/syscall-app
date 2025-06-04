@@ -138,6 +138,9 @@
     <template v-else>
       <TasksTable
         :per-page="perPage"
+        :sort-by="sortBy"
+        :sort-order="sortOrder"
+        :filters="tableFilters"
         @openChat="openChatModal"
         @addNote="openAddNoteModal"
         @openAttachments="openAttachmentsModal"
@@ -329,6 +332,7 @@ const fetchTasksDebounced = debounce(async () => {
   const page = pagination.value.current_page;
   await tasksStore.getTasks(search.value, selectedSegment.value, page, {
     ...tableFilters.value, // Usar os filtros persistentes
+    per_page: perPage.value,
     show_all: showAllTasks.value,
     filter_month: selectedMonth.value,
     filter_year: selectedYear.value
@@ -389,7 +393,8 @@ const openAddNoteModal = (task) => {
 const updateUserSegment = async () => {
   try {
     await meStore.updateUserSegment(selectedSegment.value);
-    fetchTasksDebounced(pagination.value.current_page);
+    pagination.value.current_page = 1; // redefine para a primeira página
+    await fetchTasks(1); // busca com a nova segmentação e paginação correta
   } catch (error) {
     console.error("Erro ao atualizar segmento:", error);
   }
@@ -405,6 +410,7 @@ const handleShowAllChange = async (value) => {
       1,
       {
         ...tableFilters.value, // Usar os filtros persistentes
+        per_page: perPage.value,
         show_all: value,
         filter_month: selectedMonth.value,
         filter_year: selectedYear.value
@@ -522,6 +528,7 @@ const applyDateFilter = async () => {
     pagination.value.current_page,
     {
       ...tableFilters.value,
+      per_page: perPage.value,
       taskStatus: ['Concluído'],
       show_all: true,
       filter_month: selectedMonth.value,
