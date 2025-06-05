@@ -268,7 +268,7 @@ const tasksStore = useTasksStore();
 
 const segments = [
   { label: 'Grãos', value: 1 },
-  { label: 'Proteína', value: 2 }
+  { label: 'Proteína', value: 2 },
 ];
 
 const types = [
@@ -278,7 +278,7 @@ const types = [
 
 const { handleSubmit, errors, isSubmitting, setFieldValue, setErrors } = useForm({
   validationSchema: object({
-    segment: number().required().label('Segmento'),
+    segment: number().required().oneOf([1, 2], 'Segmento inválido').label('Segmento'),
     task_type: number().required().label('Tipo de chamado'),
     task_code: string().required().label('Número do chamado'),
     name: string().required().label('Título'),
@@ -301,7 +301,7 @@ const { handleSubmit, errors, isSubmitting, setFieldValue, setErrors } = useForm
     status: boolean().required().label('Status'),
   }),
   initialValues: {
-    segment: props.task.segment,
+    segment: segments.some(s => s.value === Number(props.task.segment)) ? Number(props.task.segment) : 1,
     task_type: props.task.task_type,
     task_code: props.task.task_code,
     name: props.task.name,
@@ -393,7 +393,6 @@ const submit = handleSubmit(async (payload) => {
       payload.complexity_justification = '';
     }
 
-    console.log('Payload being sent to the backend:', payload);
     await tasksStore.updateTask(props.task.id, payload);
     emit("edit");
   } catch (error) {

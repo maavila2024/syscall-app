@@ -43,8 +43,9 @@
                 <v-card-title>Adicionar chamado</v-card-title>
                 <v-card-text>
                   <TaskAddForm
-                    @add="isActive.value = false"
-                    @cancel="isActive.value = false"
+                    v-if="isShowing"
+                    @add="onTaskAdded"
+                    @cancel="isShowing.value = false"
                   />
                 </v-card-text>
               </v-card>
@@ -76,7 +77,7 @@
               label="Mostrar Todos Chamados"
               color="primary"
               hide-details
-              @change="handleShowAllChange"
+              @change="handleShowAllChange(showAllTasks)"
               @click.stop
             ></v-switch>
           </div>
@@ -174,9 +175,10 @@
             <v-card-title>Editar chamado</v-card-title>
             <v-card-text>
               <TaskEditForm
+                v-if="isEditing"
                 :task="toEdit"
-                @cancel="isActive.value = false"
-                @edit="isActive.value = false"
+                @edit="onTaskEdited"
+                @cancel="isEditing.value = false"
               />
             </v-card-text>
           </v-card>
@@ -409,7 +411,7 @@ const handleShowAllChange = async (value) => {
       selectedSegment.value,
       1,
       {
-        ...tableFilters.value, // Usar os filtros persistentes
+        ...tableFilters.value,
         per_page: perPage.value,
         show_all: value,
         filter_month: selectedMonth.value,
@@ -581,7 +583,23 @@ watch(perPage, async (newPerPage) => {
   }
 });
 
+const applyUserFilters = () => {
+  fetchTasks({
+    ...tableFilters.value,
+    per_page: pagination.value.per_page,
+    page: pagination.value.current_page,
+  });
+};
 
+const onTaskAdded = () => {
+  isShowing.value = false;
+  fetchTasks(1); // Recarrega na primeira página
+};
+
+const onTaskEdited = () => {
+  isEditing.value = false;
+  fetchTasks(pagination.value.current_page); // Mantém a página atual
+};
 
 </script>
 

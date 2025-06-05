@@ -259,14 +259,14 @@ const submit = handleSubmit(async (values) => {
   values.segment = segment.value;
   try {
     const files = selectedFiles.value;
-    const taskPayload = await tasksStore.storeTask(values, files);
-    if (taskPayload) {
-      feedbackMessage.value = 'Chamado criado com sucesso!';
-      emit("add");
-    }
+    await tasksStore.storeTask(values, files);
+    feedbackMessage.value = 'Chamado criado com sucesso!';
+    feedbackColor.value = '#4CAF50'; // verde padrão
+    emit("add");
   } catch (error) {
     console.error('Erro ao adicionar comentário ou fazer upload dos arquivos:', error);
     feedbackMessage.value = 'Erro ao criar o chamado. Por favor, tente novamente.';
+    feedbackColor.value = 'error';
   }
 });
 
