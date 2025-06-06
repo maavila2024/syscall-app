@@ -32,20 +32,19 @@
           </v-btn>
         </v-col>
         <v-col cols="12" lg="2" md="2" class="text-right">
-          <v-dialog width="800" persistent>
-            <template #activator="{ props: activatorProps }">
-              <v-btn flat color="primary" v-bind="activatorProps"
-                >Novo Chamado</v-btn
-              >
+          <v-dialog v-model="showAddModal" width="800" persistent>
+            <template #activator="{ props }">
+              <v-btn flat color="primary" v-bind="props">
+                Novo Chamado
+              </v-btn>
             </template>
-            <template #default="{ isActive }">
-              <v-card width="800">
+            <template #default>
+              <v-card class="pa-4">
                 <v-card-title>Adicionar chamado</v-card-title>
                 <v-card-text>
-                  <TaskAddForm
-                    v-if="isShowing"
-                    @add="onTaskAdded"
-                    @cancel="isShowing.value = false"
+                  <TaskAddForm 
+                    @add="onTaskAdded" 
+                    @cancel="showAddModal = false" 
                   />
                 </v-card-text>
               </v-card>
@@ -170,15 +169,14 @@
         </template>
       </v-dialog>
       <v-dialog v-model="isEditing" width="800" persistent>
-        <template #default="{ isActive }">
-          <v-card width="800">
+        <template #default>
+          <v-card class="pa-4">
             <v-card-title>Editar chamado</v-card-title>
             <v-card-text>
               <TaskEditForm
-                v-if="isEditing"
                 :task="toEdit"
                 @edit="onTaskEdited"
-                @cancel="isEditing.value = false"
+                @cancel="isEditing = false"
               />
             </v-card-text>
           </v-card>
@@ -299,6 +297,9 @@ const selectedTaskId = ref(null);
 const showChatModal = ref(false);
 const showAddNoteModal = ref(false);
 const showAttachmentsModal = ref(false);
+
+// Adicionar nova ref para o modal de adição
+const showAddModal = ref(false);
 
 const sortBy = ref('created_at');
 const sortOrder = ref('desc');
@@ -592,14 +593,20 @@ const applyUserFilters = () => {
 };
 
 const onTaskAdded = () => {
-  isShowing.value = false;
-  fetchTasks(1); // Recarrega na primeira página
+  console.log('Evento @add recebido');
+  showAddModal.value = false;
+  fetchTasks(1);
 };
 
 const onTaskEdited = () => {
   isEditing.value = false;
   fetchTasks(pagination.value.current_page); // Mantém a página atual
 };
+
+// Adicionar watch para debug do modal
+watch(showAddModal, (val) => {
+  console.log("Modal visível?", val);
+});
 
 </script>
 
@@ -659,5 +666,10 @@ const onTaskEdited = () => {
 .switch-container {
   display: flex;
   align-items: center;
+}
+
+.v-card {
+  max-width: 800px;
+  width: 100%;
 }
 </style>

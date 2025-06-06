@@ -62,39 +62,43 @@
             </th>
             <th class="text-left">Ações</th>
             <th class="text-right">
-              <v-menu v-model="showColumnSettings" location="bottom end">
-                <template v-slot:activator="{ props }">
-                  <v-btn icon v-bind="props">
-                    <SettingsIcon />
-                  </v-btn>
+              <v-tooltip text="Exibir colunas">
+                <template v-slot:activator="{ props: tooltipProps }">
+                  <v-menu v-model="showColumnSettings" location="bottom end">
+                    <template v-slot:activator="{ props: menuProps }">
+                      <v-btn icon v-bind="Object.assign({}, menuProps, tooltipProps)">
+                        <SettingsIcon />
+                      </v-btn>
+                    </template>
+                    <v-list>
+                      <v-list-item>
+                        <v-checkbox
+                          v-model="showExpectedDate"
+                          label="Exibir Data Prevista"
+                          density="compact"
+                          hide-details
+                        />
+                      </v-list-item>
+                      <v-list-item>
+                        <v-checkbox
+                          v-model="showPriority"
+                          label="Exibir Prioridade"
+                          density="compact"
+                          hide-details
+                        />
+                      </v-list-item>
+                      <v-list-item>
+                        <v-checkbox
+                          v-model="showResponsible"
+                          label="Exibir Responsável"
+                          density="compact"
+                          hide-details
+                        />
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
                 </template>
-                <v-list>
-                  <v-list-item>
-                    <v-checkbox
-                      v-model="showExpectedDate"
-                      label="Exibir Data Prevista"
-                      density="compact"
-                      hide-details
-                    />
-                  </v-list-item>
-                  <v-list-item>
-                    <v-checkbox
-                      v-model="showPriority"
-                      label="Exibir Prioridade"
-                      density="compact"
-                      hide-details
-                    />
-                  </v-list-item>
-                  <v-list-item>
-                    <v-checkbox
-                      v-model="showResponsible"
-                      label="Exibir Responsável"
-                      density="compact"
-                      hide-details
-                    />
-                  </v-list-item>
-                </v-list>
-              </v-menu>
+              </v-tooltip>
             </th>
           </tr>
         </thead>

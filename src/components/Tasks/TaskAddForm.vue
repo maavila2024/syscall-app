@@ -134,7 +134,7 @@
             <v-btn 
               flat 
               text="Cancelar" 
-              @click="emit('cancel')"
+              @click="cancel"
               :disabled="isSubmitting"
             />
           </v-col>
@@ -252,25 +252,40 @@ const { handleSubmit, errors, isSubmitting } = useForm({
   },
 });
 
+const feedbackMessage = ref("");
+const feedbackColor = ref("");
+
 const submit = handleSubmit(async (values) => {
-  console.log('priority_id at submit:', priority_id.value);
-  console.log('values before sending:', values);
   values.priority_id = priority_id.value;
   values.segment = segment.value;
+
   try {
     const files = selectedFiles.value;
-    await tasksStore.storeTask(values, files);
-    feedbackMessage.value = 'Chamado criado com sucesso!';
-    feedbackColor.value = '#4CAF50'; // verde padrão
-    emit("add");
+    const response = await tasksStore.storeTask(values, files);
+
+    if (response?.id) {
+      feedbackMessage.value = "Chamado criado com sucesso!";
+      feedbackColor.value = "#4CAF50";
+      console.log('Emitindo add após criação com sucesso');
+      emit("add");
+    } else {
+      throw new Error("Erro ao criar chamado");
+    }
   } catch (error) {
-    console.error('Erro ao adicionar comentário ou fazer upload dos arquivos:', error);
-    feedbackMessage.value = 'Erro ao criar o chamado. Por favor, tente novamente.';
-    feedbackColor.value = 'error';
+    console.error("Erro ao adicionar comentário ou fazer upload dos arquivos:", error);
+    feedbackMessage.value = "Erro ao criar o chamado. Por favor, tente novamente.";
+    feedbackColor.value = "error";
   }
 });
 
-const feedbackMessage = ref("");
+// Watch para limpar mensagens após 5 segundos
+watch(() => feedbackMessage.value, (msg) => {
+  if (!msg) return;
+  setTimeout(() => {
+    feedbackMessage.value = "";
+  }, 5000);
+});
+
 const { value: name } = useField("name");
 const { value: task_type } = useField("task_type");
 const { value: system_screen } = useField("system_screen");
@@ -304,5 +319,10 @@ watch(priority_id, (newVal) => {
     priority_justification.value = "";
   }
 });
+
+const cancel = () => {
+  console.log('emit cancel');
+  emit('cancel');
+};
 
 </script>
