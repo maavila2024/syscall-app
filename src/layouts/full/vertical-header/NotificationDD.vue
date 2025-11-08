@@ -45,8 +45,18 @@
                 {{ item.data.title }}
               </h6>
               <p class="text-subtitle-1 font-weight-regular">
-                {{ item.data.interaction?.comment || "No comment available" }}
+                {{ item.data.interaction?.comment || item.data.message || "No comment available" }}
               </p>
+              <div v-if="item.data.type === 'password_reset_request'" class="mt-2">
+                <v-btn
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                  @click.stop="handlePasswordReset(item)"
+                >
+                  Resetar Senha
+                </v-btn>
+              </div>
             </div>
           </v-list-item>
         </v-list>
@@ -68,6 +78,7 @@
 <script>
 import { onMounted, ref, computed } from "vue";
 import { useMeStore } from "@/stores/me";
+import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
 import { BellIcon } from "vue-tabler-icons";
 import IdleCountdown from '@/components/ui/IdleCountdown.vue';
@@ -79,10 +90,12 @@ export default {
   },
   setup() {
     const meStore = useMeStore();
+    const authStore = useAuthStore();
     const router = useRouter();
     const notifications = ref([]);
     const allNotifications = ref([]);
     const showAllNotifications = ref(false);
+    const resettingPassword = ref(false);
 
     const unreadNotifications = computed(() => {
       return notifications.value.filter(
@@ -97,6 +110,11 @@ export default {
     });
 
     const markAsReadAndNavigate = async (notification) => {
+      // Não navegar se for notificação de reset de senha
+      if (notification.data.type === 'password_reset_request') {
+        return;
+      }
+
       await meStore.markNotificationComplete(notification.id);
       notifications.value = notifications.value.filter(
         (n) => n.id !== notification.id
@@ -109,6 +127,40 @@ export default {
         router.push({ name: "tasks", query: { search: taskCode } });
       } else {
         console.error("Task code not found in notification data", notification);
+      }
+    };
+
+    const handlePasswordReset = async (notification) => {
+      if (resettingPassword.value) return;
+      
+      resettingPassword.value = true;
+      
+      try {
+        const userId = notification.data.user_id;
+        const response = await authStore.supportResetPassword(userId);
+        
+        // Marcar notificação como lida
+        await meStore.markNotificationComplete(notification.id);
+        notifications.value = notifications.value.filter(
+          (n) => n.id !== notification.id
+        );
+        
+        // Mostrar mensagem de sucesso com o link
+        const resetUrl = response.data.reset_url || `http://localhost:5174/reset-password-by-token/${response.data.reset_token}`;
+        const message = `Token de reset gerado para o usuário ${notification.data.user_email}.\n\nLink: ${resetUrl}\n\nCopie este link e envie para o usuário via email interno.`;
+        alert(message);
+        
+        // Copiar link para clipboard se possível
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(resetUrl).then(() => {
+            console.log('Link copiado para clipboard');
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao gerar token de reset:', error);
+        alert('Erro ao gerar token de reset. Tente novamente.');
+      } finally {
+        resettingPassword.value = false;
       }
     };
 
@@ -134,25 +186,71 @@ export default {
     };
 
     onMounted(() => {
+      console.log('🔔 [FRONTEND] NotificationDD montado');
+      
       meStore.getMe().then(() => {
-        notifications.value = meStore.user ? meStore.user.notifications : [];
-        Echo.private(`notifications.${meStore.user.id}`).notification((e) => {
-          console.log("Notification received:", e);
-
-          // Garantir que a estrutura dos dados recebidos seja consistente
-          const notification = {
-            ...e,
-            data: {
-              ...e.data,
-              task: e.data.task || { task_code: e.data.task_code },
-            },
-          };
-
-          notifications.value.push(notification);
-          if (showAllNotifications.value) {
-            allNotifications.value.push(notification);
-          }
+        console.log('🔔 [FRONTEND] getMe() concluído', {
+          user: meStore.user,
+          user_id: meStore.user?.id,
+          notifications_count: meStore.user?.notifications?.length || 0,
         });
+
+        notifications.value = meStore.user ? meStore.user.notifications : [];
+        
+        const channelName = `notifications.${meStore.user.id}`;
+        console.log('🔔 [FRONTEND] Configurando listener Echo', {
+          channel_name: channelName,
+          user_id: meStore.user.id,
+          echo_configured: typeof Echo !== 'undefined',
+        });
+
+        try {
+          const channel = Echo.private(channelName);
+          console.log('🔔 [FRONTEND] Canal privado criado', { channel });
+
+          channel
+            .notification((e) => {
+              console.log('🔔 [FRONTEND] ⭐ NOTIFICAÇÃO RECEBIDA VIA PUSHER ⭐', {
+                notification: e,
+                channel: channelName,
+                timestamp: new Date().toISOString(),
+              });
+
+              // Garantir que a estrutura dos dados recebidos seja consistente
+              const notification = {
+                ...e,
+                data: {
+                  ...e.data,
+                  task: e.data.task || { task_code: e.data.task_code },
+                },
+              };
+
+              notifications.value.push(notification);
+              if (showAllNotifications.value) {
+                allNotifications.value.push(notification);
+              }
+
+              console.log('🔔 [FRONTEND] Notificação adicionada ao array', {
+                notifications_count: notifications.value.length,
+                unread_count: unreadNotifications.value.length,
+              });
+            })
+            .error((error) => {
+              console.error('🔔 [FRONTEND] Erro no canal Echo', {
+                error,
+                channel: channelName,
+              });
+            });
+
+          console.log('🔔 [FRONTEND] Listener configurado com sucesso');
+        } catch (error) {
+          console.error('🔔 [FRONTEND] Erro ao configurar Echo listener', {
+            error,
+            channel: channelName,
+          });
+        }
+      }).catch((error) => {
+        console.error('🔔 [FRONTEND] Erro ao obter dados do usuário', error);
       });
     });
 
@@ -165,6 +263,8 @@ export default {
       markAllAsRead,
       fetchAllNotifications,
       showAllNotifications,
+      handlePasswordReset,
+      resettingPassword,
     };
   },
 };

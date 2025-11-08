@@ -61,6 +61,31 @@ export default [
             },
         ]
     },
+    {
+        path: '/force-change-password',
+        component: () => import('@/layouts/blank/BlankLayout.vue'),
+        meta: {
+            requiresAuth: true
+        },
+        children: [
+            {
+                name: 'force-change-password',
+                path: '',
+                component: () => import('@/views/authentication/SideForceChangePassword.vue')
+            },
+        ]
+    },
+    {
+        path: '/reset-password-by-token/:token',
+        component: () => import('@/layouts/blank/BlankLayout.vue'),
+        children: [
+            {
+                name: 'reset-password-by-token',
+                path: '',
+                component: () => import('@/views/authentication/SideResetPasswordByToken.vue')
+            },
+        ]
+    },
     
     //         {
     //             name: 'Boxed Login',

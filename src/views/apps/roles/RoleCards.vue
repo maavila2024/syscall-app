@@ -1,15 +1,30 @@
 <script setup>
-import avatar1 from '@images/avatars/avatar-1.png'
-import avatar10 from '@images/avatars/avatar-10.png'
-import avatar2 from '@images/avatars/avatar-2.png'
-import avatar3 from '@images/avatars/avatar-3.png'
-import avatar4 from '@images/avatars/avatar-4.png'
-import avatar5 from '@images/avatars/avatar-5.png'
-import avatar6 from '@images/avatars/avatar-6.png'
-import avatar7 from '@images/avatars/avatar-7.png'
-import avatar8 from '@images/avatars/avatar-8.png'
-import avatar9 from '@images/avatars/avatar-9.png'
-import girlUsingMobile from '@images/pages/girl-using-mobile.png'
+// Imagens comentadas - não existem no projeto
+// import avatar1 from '@images/avatars/avatar-1.png'
+// import avatar10 from '@images/avatars/avatar-10.png'
+// import avatar2 from '@images/avatars/avatar-2.png'
+// import avatar3 from '@images/avatars/avatar-3.png'
+// import avatar4 from '@images/avatars/avatar-4.png'
+// import avatar5 from '@images/avatars/avatar-5.png'
+// import avatar6 from '@images/avatars/avatar-6.png'
+// import avatar7 from '@images/avatars/avatar-7.png'
+// import avatar8 from '@images/avatars/avatar-8.png'
+// import avatar9 from '@images/avatars/avatar-9.png'
+// import girlUsingMobile from '@images/pages/girl-using-mobile.png'
+
+// Usando imagens existentes do projeto como placeholder
+import avatar1 from '@/assets/images/profile/user-1.jpg'
+import avatar2 from '@/assets/images/profile/user-2.jpg'
+import avatar3 from '@/assets/images/profile/user-3.jpg'
+import avatar4 from '@/assets/images/profile/user-4.jpg'
+import avatar5 from '@/assets/images/profile/user-5.jpg'
+import avatar6 from '@/assets/images/profile/user-6.jpg'
+import avatar7 from '@/assets/images/profile/user-7.jpg'
+import avatar8 from '@/assets/images/profile/user-8.jpg'
+import avatar9 from '@/assets/images/profile/user-9.jpg'
+import avatar10 from '@/assets/images/profile/user-10.jpg'
+// Usando uma imagem existente como placeholder para girlUsingMobile
+import girlUsingMobile from '@/assets/images/svgs/icon-user-male.svg'
 
 const roles = ref([
   {
@@ -298,10 +313,11 @@ const editPermission = value => {
             cols="5"
             class="d-flex flex-column justify-end align-center mt-5"
           >
-            <img
+            <!-- Imagem comentada - não existe no projeto -->
+            <!-- <img
               width="85"
               :src="girlUsingMobile"
-            >
+            > -->
           </VCol>
 
           <VCol cols="7">

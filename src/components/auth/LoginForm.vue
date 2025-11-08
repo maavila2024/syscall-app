@@ -13,7 +13,7 @@ const schema = object({
 const {handleSubmit, errors, isSubmitting} = useForm({
   validationSchema: schema,
   initialValues: {
-    email: 'teste@agcocorp.com',
+    email: 'teste@grainproteintech.com',
     password: ''
   }
 })
@@ -36,8 +36,13 @@ function login(values) {
 
   authStore
     .login(values.email, values.password)
-    .then(() => {
-      router.push({name: 'dashboard'})
+    .then((result) => {
+      if (result && result.must_change_password) {
+        // Redirecionar para página de alteração obrigatória de senha
+        router.push({name: 'force-change-password'})
+      } else {
+        router.push({name: 'dashboard'})
+      }
     })
     .catch((e) => {
       feedbackMessage.value = e.message
@@ -56,7 +61,7 @@ function login(values) {
     <VTextField
       v-model="email"
       class="mb-8"
-      placeholder="email@agcocorp.com"
+      placeholder="email@grainproteintech.com"
       type="email"
       autofocus
       :error-messages="errors.email"

@@ -220,6 +220,21 @@
           </v-col>
         </v-row>
         <v-row>
+          <v-col cols="6">
+            <v-select
+              v-model="procedure_performed_id"
+              :error-messages="errors.procedure_performed_id"
+              :items="proceduresPerformed"
+              :disabled="!isStatusCompleted"
+              label="Procedimento Realizado"
+              item-title="label"
+              item-value="value"
+              variant="outlined"
+              color="primary"
+            ></v-select>
+          </v-col>
+        </v-row>
+        <v-row>
           <v-col cols="12">
             <v-switch
               v-model="status"
@@ -266,6 +281,10 @@ const props = defineProps({
 
 const tasksStore = useTasksStore();
 
+// Debug: verificar se procedure_performed_id está vindo do backend
+console.log('Task data received:', props.task);
+console.log('procedure_performed_id:', props.task.procedure_performed_id);
+
 const segments = [
   { label: 'Grãos', value: 1 },
   { label: 'Proteína', value: 2 },
@@ -274,6 +293,12 @@ const segments = [
 const types = [
   { label: "Algo que funcionava, parou de funcionar?", value: 1 },
   { label: "Fazer uma solicitação, algo novo (melhoria)?", value: 2 },
+];
+
+const proceduresPerformed = [
+  { label: 'Ajuste via programação', value: 1 },
+  { label: 'Ajuste via programação e atualização de tabelas', value: 2 },
+  { label: 'Atualização de tabelas', value: 3 },
 ];
 
 const { handleSubmit, errors, isSubmitting, setFieldValue, setErrors } = useForm({
@@ -298,6 +323,9 @@ const { handleSubmit, errors, isSubmitting, setFieldValue, setErrors } = useForm
     finish_date: date().nullable().label('Data de Conclusão').transform((value, originalValue) => originalValue === '' ? null : value),
     priority_justification: string().nullable().label('Justificativa da Prioridade'),
     complexity_justification: string().nullable().label('Justificativa da Complexidade'),
+    procedure_performed_id: number()
+      .nullable()
+      .label('Procedimento Realizado'),
     status: boolean().required().label('Status'),
   }),
   initialValues: {
@@ -316,6 +344,7 @@ const { handleSubmit, errors, isSubmitting, setFieldValue, setErrors } = useForm
     complexity_id: props.task.complexity_id,
     priority_justification: props.task.priority_justification,
     complexity_justification: props.task.complexity_justification,
+    procedure_performed_id: props.task.procedure_performed_id ? Number(props.task.procedure_performed_id) : null,
     finish_date: props.task.finish_date ? props.task.finish_date.split('T')[0] : null,
     expected_date: props.task.expected_date ? props.task.expected_date.split('T')[0] : null,
     created_at: props.task.created_at ? props.task.created_at.split('T')[0] : null,
@@ -393,6 +422,15 @@ const submit = handleSubmit(async (payload) => {
       payload.complexity_justification = '';
     }
 
+    // Se o status não for "Concluído", remove procedure_performed_id
+    if (payload.task_status_id !== 5) {
+      payload.procedure_performed_id = null;
+    } else if (!payload.procedure_performed_id) {
+      // Se o status for "Concluído" mas o campo estiver vazio, garantir que seja null
+      payload.procedure_performed_id = null;
+    }
+
+    console.log('Payload sendo enviado:', payload);
     await tasksStore.updateTask(props.task.id, payload);
     emit("edit");
   } catch (error) {
@@ -418,6 +456,7 @@ const { value: sequence } = useField("sequence");
 const { value: observation } = useField("observation");
 const { value: priority_justification } = useField("priority_justification");
 const { value: complexity_justification } = useField("complexity_justification");
+const { value: procedure_performed_id } = useField("procedure_performed_id");
 const { value: expected_date } = useField("expected_date");
 const { value: finish_date } = useField("finish_date");
 const { value: created_at } = useField("created_at");
@@ -426,6 +465,10 @@ const { value: status } = useField('status');
 const shouldShowPriorityJustification = computed(() => {
   const selectedPriority = tasksStore.priori.find(p => p.id === priority_id.value);
   return selectedPriority && selectedPriority.justify;
+});
+
+const isStatusCompleted = computed(() => {
+  return task_status_id.value === 5; // Status "Concluído" tem id = 5
 });
 
 watch(priority_id, (newVal) => {
@@ -448,6 +491,12 @@ watch(task_status_id, (newStatusId) => {
     finish_date.value = today;
     
     console.log('Status alterado para Concluído/Cancelado. Data de conclusão definida:', today);
+  }
+  
+  // Se o status não for "Concluído", limpa o procedimento realizado
+  if (newStatusId !== 5) {
+    procedure_performed_id.value = null;
+    setFieldValue('procedure_performed_id', null);
   }
 });
 </script>

@@ -22,7 +22,7 @@ const submit = handleSubmit(async (values) => {
     feedbackMessage.value = null 
     await authStore.forgotPassword(values.email)
         .then(() => {
-            emits('after-request')
+            emits('after-request', values.email)
         })
         .catch((e) => {
             feedbackMessage.value = e.message
@@ -42,7 +42,7 @@ const { value: email } = useField('email');
         <v-label class="text-subtitle-1 font-weight-semibold pb-2 text-lightText">E-mail</v-label>
         <VTextField
             v-model="email"
-            placeholder="email@agcocorp.com"
+            placeholder="email@grainproteintech.com"
             type="email"
             autofocus
             :error-messages="errors.email">

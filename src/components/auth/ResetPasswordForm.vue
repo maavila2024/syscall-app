@@ -75,8 +75,8 @@ const { value: password } = useField('password');
                 >Resetar a senha
             </v-btn>
             <h6 class="text-h6 mt-5 font-weight-regular">
-                Didn't get the code?
-                <RouterLink to="/" class="text-primary text-subtitle-1 text-decoration-none pl-1 font-weight-medium"> Resend</RouterLink>
+                Não recebeu o código?
+                <RouterLink to="/forgot-password" class="text-primary text-subtitle-1 text-decoration-none pl-1 font-weight-medium"> Solicitar novamente</RouterLink>
             </h6>
         </div>
     </v-form>

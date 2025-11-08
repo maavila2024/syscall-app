@@ -29,21 +29,47 @@ window.Echo = new Echo({
   cluster: import.meta.env.VITE_PUSHER_CLUSTER,
   forceTLS: true,
   authorizer: (channel, options) => {
+    console.log('🔔 [FRONTEND] Echo authorizer chamado', {
+      channel: channel.name,
+      pusher_key: import.meta.env.VITE_PUSHER_KEY,
+      pusher_cluster: import.meta.env.VITE_PUSHER_CLUSTER,
+    });
+    
     return {
       authorize: (socketId, callback) => {
-        axios.post('/broadcasting/auth', {
+        console.log('🔔 [FRONTEND] Autorizando canal', {
+          socket_id: socketId,
+          channel_name: channel.name,
+        });
+        
+        axios.post('/api/broadcasting/auth', {
           socket_id: socketId,
           channel_name: channel.name
         })
         .then(response => {
+          console.log('🔔 [FRONTEND] ✅ Canal autorizado com sucesso', {
+            channel: channel.name,
+            response: response.data,
+          });
           callback(false, response.data);
         })
         .catch(error => {
+          console.error('🔔 [FRONTEND] ❌ Erro ao autorizar canal', {
+            channel: channel.name,
+            error: error.response?.data || error.message,
+            status: error.response?.status,
+          });
           callback(true, error);
         });
       }
     };
   }
+});
+
+console.log('🔔 [FRONTEND] Echo configurado', {
+  broadcaster: 'pusher',
+  key: import.meta.env.VITE_PUSHER_KEY ? '✅ Configurado' : '❌ Não configurado',
+  cluster: import.meta.env.VITE_PUSHER_CLUSTER ? '✅ Configurado' : '❌ Não configurado',
 });
          
 const i18n = createI18n({

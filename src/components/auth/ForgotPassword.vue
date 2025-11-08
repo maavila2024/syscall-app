@@ -1,27 +1,28 @@
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import ForgotPasswordForm from './ForgotPasswordForm.vue';
-import ResetPasswordForm from './ResetPasswordForm.vue';
+import WaitForEmail from './WaitForEmail.vue';
 
-const state = ref('forgotPassword')
+const router = useRouter();
+const state = ref('forgotPassword');
+const userEmail = ref('');
+
+const handleAfterRequest = (email) => {
+  userEmail.value = email;
+  state.value = 'waitForEmail';
+}
 </script>
 
 <template>
     <div>
         <ForgotPasswordForm
             v-if="state === 'forgotPassword'"
-            @after-request="state = 'resetPassword'"
+            @after-request="handleAfterRequest"
         />
-        <ResetPasswordForm 
-            v-if="state === 'resetPassword'"
-            @after-reset="state = 'reset'"
+        <WaitForEmail 
+            v-if="state === 'waitForEmail'"
+            :email="userEmail"
         />
-        <VAlert
-            v-if="state === 'reset'"
-            color="success"
-            class="mb-2"
-        >
-            Sua senha foi redefinida com sucesso!
-        </VAlert>
     </div>
 </template>

@@ -23,7 +23,7 @@ const { handleSubmit, errors, isSubmitting } = useForm({
   validationSchema: schema,
   initialValues: {
     first_name: "",
-    email: "teste@agcocorp.com",
+    email: "teste@grainproteintech.com",
     password: "",
   },
 });
